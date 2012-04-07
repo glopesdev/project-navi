@@ -11,12 +11,17 @@ namespace ProjectNavi.Hardware
 {
     public class DifferentialSteeringBoard : HardwareComponent, IDifferentialSteering
     {
-        const byte SetWheelVelocityCode = 0x56;
+        const byte SetWheelVelocityCode = 0x86;
         ICommunicationManager manager;
         private WheelVelocity currentVelocity;
         private WheelVelocity previousVelocity;
         float accelerationWeight = 1f;
         float breakingWeight = 0.1f;
+
+        public DifferentialSteeringBoard(ICommunicationManager communicationManager, double wheelRadius)
+            : this(communicationManager, wheelRadius, 1f, 0.1f)
+        {
+        }
 
         public DifferentialSteeringBoard(ICommunicationManager communicationManager, double wheelRadius, float accelerationWeight, float breakingWeight)
         {
@@ -33,16 +38,16 @@ namespace ProjectNavi.Hardware
         }
         public double WheelRadius { get; private set; }
 
-        public IObservable<IDifferentialSteeringResponse> CommandChecksum { get; private set; }
+        public IObservable<DifferentialSteeringResponse> CommandChecksum { get; private set; }
 
         public void UpdateWheelVelocity(WheelVelocity wheelVelocity)
         {
             currentVelocity = wheelVelocity;
         }
 
-        IDifferentialSteeringResponse ParseMotorActuatorResponse(byte[] response)
+        DifferentialSteeringResponse ParseMotorActuatorResponse(byte[] response)
         {
-            return new IDifferentialSteeringResponse(currentVelocity, (short)((response[0] << 8) + response[1]));
+            return new DifferentialSteeringResponse(currentVelocity);
         }
 
         public void Actuate()
@@ -63,7 +68,7 @@ namespace ProjectNavi.Hardware
             var right = previousVelocity.RightVelocity + (rightWeight * (currentVelocity.RightVelocity - previousVelocity.RightVelocity));
             previousVelocity = new WheelVelocity(left, right);
             var command = ParseUpdateWheelVelocity(previousVelocity, SetWheelVelocityCode);
-            manager.CommandAsync(command, 3, this);
+            manager.CommandAsync(command, 0, this);
         }
 
         public static byte[] ParseUpdateWheelVelocity(WheelVelocity wheelVelocity, byte setWheelVelocityCode)
