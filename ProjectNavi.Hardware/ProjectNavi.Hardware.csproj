@@ -41,6 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BatteryBoard.cs" />
+    <Compile Include="BumperBoard.cs" />
     <Compile Include="CommandCompletedEventArgs.cs" />
     <Compile Include="CommunicationManagerLogger.cs" />
     <Compile Include="CommunicationManagerPlayer.cs" />

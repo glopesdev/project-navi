@@ -9,28 +9,21 @@ namespace ProjectNavi.Hardware
     {
         void Actuate();
         void UpdateWheelVelocity(WheelVelocity wheelVelocity);
-        IObservable<IDifferentialSteeringResponse> CommandChecksum { get; }
+        IObservable<DifferentialSteeringResponse> CommandChecksum { get; }
     }
 
-    public struct IDifferentialSteeringResponse
+    public struct DifferentialSteeringResponse
     {
         WheelVelocity wheelVelocity;
-        short checkSum;
 
-        public IDifferentialSteeringResponse(WheelVelocity velocity, short checkSum)
+        public DifferentialSteeringResponse(WheelVelocity velocity)
         {
             wheelVelocity = velocity;
-            this.checkSum = checkSum;
         }
 
         public WheelVelocity Velocity
         {
             get { return wheelVelocity; }
-        }
-
-        public short CheckSum
-        {
-            get { return checkSum; }
         }
     }
 

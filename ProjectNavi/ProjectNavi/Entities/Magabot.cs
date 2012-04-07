@@ -11,6 +11,7 @@ using ProjectNavi.Hardware;
 using System.Reactive.Linq;
 using ProjectNavi.Localization;
 using MathNet.Numerics.LinearAlgebra.Double;
+using System.Threading;
 
 namespace ProjectNavi.Entities
 {
@@ -23,7 +24,13 @@ namespace ProjectNavi.Entities
                     let wheelDistance = 0.345f
                     let wheelRadius = 0.0467f
                     let transform = new Transform2D()
+                    let text = new StringBuilder()
+                    let font = game.Content.Load<SpriteFont>("DebugFont")
                     let texture = game.Content.Load<Texture2D>("magabot_cm")
+                    let bumperTexture = game.Content.Load<Texture2D>("square")
+                    let bumpers = new BumperBoard(communication)
+                    let battery = new BatteryBoard(communication)
+                    let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius)
                     let odometry = new OdometryBoard(communication, wheelClicks, wheelRadius, wheelDistance)
                     let kalman = new KalmanFilter
                     {
@@ -34,23 +41,35 @@ namespace ProjectNavi.Entities
                             { 0, 0, 1 } })
                     }
 
-                    let odometryMeasurements = from measurement in odometry.Odometry
-                                               select new Vector2(
-                                                   (float)(measurement.LinearDisplacement * Math.Cos(measurement.AngularDisplacement)),
-                                                   (float)(measurement.LinearDisplacement * Math.Sin(measurement.AngularDisplacement)))
                     let behavior = scheduler.TaskUpdate
                                             .Do(time => odometry.UpdateOdometryCommand())
+                                            .Do(time => differentialSteering.UpdateWheelVelocity(new WheelVelocity(10,10)))
                                             .Take(1)
                     select new CompositeDisposable(
+                        bumpers,                         
+                        battery,
                         odometry,
+                        differentialSteering,
                         renderer.SubscribeTexture(transform, texture),
+                        renderer.SubscribeText(transform, font, () => text.ToString()),
                         behavior.Subscribe(),
+                        differentialSteering.CommandChecksum.Subscribe( m => bumpers.GetBumperState()),
+                        bumpers.BumpersMeasure.Subscribe(m => 
+                            {
+                                battery.GetBatteryState();
+                            }),
+                        battery.BatteryMeasure.Subscribe(m => 
+                            {
+                                text.Clear();
+                                text.AppendLine(string.Format("Battery: {0}", m.ToString()));
+                                odometry.UpdateOdometryCommand();
+                            }),
                         odometry.Odometry.Subscribe(m =>
                         {
                             OdometryLocalization.OdometerPredict(kalman, m.LinearDisplacement, m.AngularDisplacement);
                             transform.Position = new Vector2((float)kalman.Mean[0], (float)kalman.Mean[1]);
                             transform.Rotation = (float)kalman.Mean[2];
-                            odometry.UpdateOdometryCommand();
+                            differentialSteering.Actuate();
                         })))
                     .First();
         }
