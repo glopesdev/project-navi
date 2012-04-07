@@ -95,25 +95,24 @@ namespace ProjectNavi.Hardware
                         throw new InvalidOperationException("Unexpected command response.");
                     }
                 }
-                else
+
+                var response = currentCommand.Response;
+                var bytesRead = serialPort.Read(response, currentCommand.Offset, response.Length - currentCommand.Offset);
+                currentCommand.Offset += bytesRead;
+
+                if (currentCommand.Offset == response.Length)
                 {
-                    var response = currentCommand.Response;
-                    var bytesRead = serialPort.Read(response, currentCommand.Offset, response.Length - currentCommand.Offset);
-                    currentCommand.Offset += bytesRead;
-
-                    if (currentCommand.Offset == response.Length)
+                    var userState = currentCommand.UserState;
+                    byte code = currentCommand.Code;
+                    lock (pendingCommands)
                     {
-                        var userState = currentCommand.UserState;
-                        byte code = currentCommand.Code;
-                        lock (pendingCommands)
-                        {
-                            pendingCommands.Remove(currentCommand.Code);
-                        }
-
-                        currentCommand = null;
-                        OnCommandCompleted(new CommandCompletedEventArgs(code, response, null, false, userState));
+                        pendingCommands.Remove(currentCommand.Code);
                     }
+
+                    currentCommand = null;
+                    OnCommandCompleted(new CommandCompletedEventArgs(code, response, null, false, userState));
                 }
+
             }
         }
 
