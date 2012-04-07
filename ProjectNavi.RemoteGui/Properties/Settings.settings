@@ -1,0 +1,14 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ProjectNavi.RemoteGui.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="bumperMessage" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Please don't hurt me!!
+ - I've bumped against something.</Value>
+    </Setting>
+    <Setting Name="holeMessage" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Please don't hurt me!!
+ - I've just detected a hole in the ground.</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
