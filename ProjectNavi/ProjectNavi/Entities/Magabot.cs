@@ -17,6 +17,20 @@ namespace ProjectNavi.Entities
 {
     public class Magabot
     {
+        public static Transform2D KalmanVisualization(KalmanFilter kalman)
+        {
+            var eigendecomposition = kalman.Covariance.Evd();
+            var eigenvalues = eigendecomposition.EigenValues();
+            var eigenvectors = eigendecomposition.EigenVectors();
+
+            // Transform of a unit circle
+            var translation = new Vector2((float)kalman.Mean[0], (float)kalman.Mean[1]);
+            var rotation = (float)Math.Atan2(eigenvectors[1, 0], eigenvectors[0, 0]);
+            var scale = new Vector2((float)eigenvalues[0].Real, (float)eigenvalues[1].Real);
+
+            return new Transform2D(translation, rotation, scale);
+        }
+
         public static IDisposable Create(Game game, SpriteRenderer renderer, TaskScheduler scheduler, ICommunicationManager communication)
         {
             return (from magabot in Enumerable.Range(0, 1)
