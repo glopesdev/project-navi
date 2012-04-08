@@ -37,8 +37,9 @@ namespace ProjectNavi.Entities
                     let wheelClicks = 3900
                     let wheelDistance = 0.345f
                     let wheelRadius = 0.0467f
-                    let transform = new Transform2D()
                     let text = new StringBuilder()
+                    let transform = new Transform2D()
+                    let textTransform = new Transform2D { Position = new Vector2(0, 1) }
                     let font = game.Content.Load<SpriteFont>("DebugFont")
                     let texture = game.Content.Load<Texture2D>("magabot_cm")
                     let bumperTexture = game.Content.Load<Texture2D>("square")
@@ -57,22 +58,22 @@ namespace ProjectNavi.Entities
 
                     let behavior = scheduler.TaskUpdate
                                             .Do(time => odometry.UpdateOdometryCommand())
-                                            .Do(time => differentialSteering.UpdateWheelVelocity(new WheelVelocity(10,10)))
+                                            .Do(time => differentialSteering.UpdateWheelVelocity(new WheelVelocity(10, 10)))
                                             .Take(1)
                     select new CompositeDisposable(
-                        bumpers,                         
+                        bumpers,
                         battery,
                         odometry,
                         differentialSteering,
                         renderer.SubscribeTexture(transform, texture),
-                        renderer.SubscribeText(transform, font, () => text.ToString()),
+                        renderer.SubscribeText(textTransform, transform, font, () => text.ToString()),
                         behavior.Subscribe(),
-                        differentialSteering.CommandChecksum.Subscribe( m => bumpers.GetBumperState()),
-                        bumpers.BumpersMeasure.Subscribe(m => 
+                        differentialSteering.CommandChecksum.Subscribe(m => bumpers.GetBumperState()),
+                        bumpers.BumpersMeasure.Subscribe(m =>
                             {
                                 battery.GetBatteryState();
                             }),
-                        battery.BatteryMeasure.Subscribe(m => 
+                        battery.BatteryMeasure.Subscribe(m =>
                             {
                                 text.Clear();
                                 text.AppendLine(string.Format("Battery: {0}", m.ToString()));
