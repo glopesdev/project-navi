@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <WorkflowBuilder>
-  <Workflow xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:q1="clr-namespace:ProjectNavi.Bonsai.Kinect;assembly=ProjectNavi.Bonsai.Kinect" xmlns="https://horizongir.org/bonsai">
+  <Workflow xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:q2="clr-namespace:ProjectNavi.Bonsai.Aruco;assembly=ProjectNavi.Bonsai.Aruco" xmlns:q1="clr-namespace:ProjectNavi.Bonsai.Kinect;assembly=ProjectNavi.Bonsai.Kinect" xmlns="https://horizongir.org/bonsai">
     <Nodes>
       <Expression xsi:type="Source">
         <Source xsi:type="q1:KinectSource" />
@@ -10,6 +10,16 @@
         <Selector>
           <string>ColorImage</string>
         </Selector>
+      </Expression>
+      <Expression xsi:type="Select">
+        <Projection xsi:type="q2:MarkerTracker">
+          <q2:CameraParameters>KinectColor.yml</q2:CameraParameters>
+          <q2:ThresholdType>AdaptiveThreshold</q2:ThresholdType>
+          <q2:Param1>7</q2:Param1>
+          <q2:Param2>7</q2:Param2>
+          <q2:CornerRefinement>Harris</q2:CornerRefinement>
+          <q2:MarkerSize>0.022</q2:MarkerSize>
+        </Projection>
       </Expression>
     </Nodes>
     <Edges>
@@ -23,9 +33,15 @@
         <To>2</To>
         <Label>Source</Label>
       </Edge>
+      <Edge>
+        <From>2</From>
+        <To>3</To>
+        <Label>Source</Label>
+      </Edge>
     </Edges>
   </Workflow>
   <ExtensionTypes>
     <Type>ProjectNavi.Bonsai.Kinect.KinectSource, ProjectNavi.Bonsai.Kinect, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Type>
+    <Type>ProjectNavi.Bonsai.Aruco.MarkerTracker, ProjectNavi.Bonsai.Aruco, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Type>
   </ExtensionTypes>
 </WorkflowBuilder>
