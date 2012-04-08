@@ -44,8 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GraphSlam.cs" />
     <Compile Include="KalmanFilter.cs" />
     <Compile Include="MarkerLocalization.cs" />
+    <Compile Include="MatrixExtensions.cs" />
     <Compile Include="OdometryLocalization.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
