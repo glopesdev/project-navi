@@ -48,13 +48,16 @@
     <Compile Include="CommunicationManagerPlayer.cs" />
     <Compile Include="CommunicationManagerSerial.cs" />
     <Compile Include="CommunicationManagerTcp.cs" />
+    <Compile Include="GroundSensorBoard.cs" />
     <Compile Include="HardwareComponent.cs" />
     <Compile Include="ICommunicationManager.cs" />
     <Compile Include="IDifferentialSteering.cs" />
     <Compile Include="DifferentialSteeringBoard.cs" />
     <Compile Include="IOdometry.cs" />
+    <Compile Include="LedBoard.cs" />
     <Compile Include="OdometryBoard.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SonarsBoard.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

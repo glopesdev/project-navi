@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.IO.Ports;
 using System.Threading;
+using System.Diagnostics;
 
 namespace ProjectNavi.Hardware
 {
@@ -87,7 +88,7 @@ namespace ProjectNavi.Hardware
             {
                 rightVelocity = (short)(Math.Sign((int)rightVelocity) * minValue);
             }
-            //Trace.WriteLine(leftVelocity + " " + rightVelocity);
+            Trace.WriteLine(leftVelocity + " " + rightVelocity);
             var command = new byte[5];
             command[0] = setWheelVelocityCode;
             command[1] = (byte)(rightVelocity >> 8);

@@ -30,6 +30,9 @@ namespace ProjectNavi.Entities
                     let bumperTexture = game.Content.Load<Texture2D>("square")
                     let bumpers = new BumperBoard(communication)
                     let battery = new BatteryBoard(communication)
+                    let ground = new GroundSensorBoard(communication)
+                    let leds = new LedBoard(communication)
+                    let sonars = new SonarsBoard(communication)
                     let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius)
                     let odometry = new OdometryBoard(communication, wheelClicks, wheelRadius, wheelDistance)
                     let kalman = new KalmanFilter
@@ -40,37 +43,55 @@ namespace ProjectNavi.Entities
                             { 0, 1, 0 },
                             { 0, 0, 1 } })
                     }
-
                     let behavior = scheduler.TaskUpdate
                                             .Do(time => odometry.UpdateOdometryCommand())
-                                            .Do(time => differentialSteering.UpdateWheelVelocity(new WheelVelocity(10,10)))
+                                            .Do(time => differentialSteering.UpdateWheelVelocity(new WheelVelocity(-3, -3)))
+                                            .Do(time => leds.SetLedBoardState(255, 0, 0))
                                             .Take(1)
                     select new CompositeDisposable(
-                        bumpers,                         
+                        bumpers,
                         battery,
+                        ground,
+                        leds,
+                        sonars,
                         odometry,
                         differentialSteering,
                         renderer.SubscribeTexture(transform, texture),
                         renderer.SubscribeText(transform, font, () => text.ToString()),
                         behavior.Subscribe(),
-                        differentialSteering.CommandChecksum.Subscribe( m => bumpers.GetBumperState()),
-                        bumpers.BumpersMeasure.Subscribe(m => 
+                        differentialSteering.CommandChecksum.Subscribe(m => bumpers.GetBumperState()),
+                        bumpers.BumpersMeasure.Subscribe(m =>
                             {
                                 battery.GetBatteryState();
                             }),
-                        battery.BatteryMeasure.Subscribe(m => 
+                        battery.BatteryMeasure.Subscribe(m =>
                             {
                                 text.Clear();
                                 text.AppendLine(string.Format("Battery: {0}", m.ToString()));
-                                odometry.UpdateOdometryCommand();
+                                ground.GetGroundSensorState();
                             }),
-                        odometry.Odometry.Subscribe(m =>
+                        ground.GroundSensorsMeasure.Subscribe( m => 
+                             {
+                                text.AppendLine(string.Format("IR: {0} IR: {1} IR: {2}", m.SensorLeft, m.SensorMiddle, m.SensorRight));
+                                sonars.GetSonarsBoardState();
+                            }),
+                        sonars.SonarsBoardMeasure.Subscribe(m =>
                         {
-                            OdometryLocalization.OdometerPredict(kalman, m.LinearDisplacement, m.AngularDisplacement);
-                            transform.Position = new Vector2((float)kalman.Mean[0], (float)kalman.Mean[1]);
-                            transform.Rotation = (float)kalman.Mean[2];
-                            differentialSteering.Actuate();
-                        })))
+                            foreach (var sonar in m)
+                            {
+                                text.Append(string.Format("Sonar: {0} ", sonar));
+                            }
+                            text.AppendLine();
+                            leds.Actuate();
+                        }),
+                        leds.LedBoardMeasure.Subscribe(m => odometry.UpdateOdometryCommand()),
+                        odometry.Odometry.Subscribe(m =>
+                            {
+                                OdometryLocalization.OdometerPredict(kalman, m.LinearDisplacement, m.AngularDisplacement);
+                                transform.Position = new Vector2((float)kalman.Mean[0], (float)kalman.Mean[1]);
+                                transform.Rotation = (float)kalman.Mean[2];
+                                differentialSteering.Actuate();
+                            })))
                     .First();
         }
     }
