@@ -164,6 +164,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="KinectColor.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Vision.bonsai">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
