@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WorkflowBuilder>
+  <Workflow xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:q1="clr-namespace:ProjectNavi.Bonsai.Kinect;assembly=ProjectNavi.Bonsai.Kinect" xmlns="https://horizongir.org/bonsai">
+    <Nodes>
+      <Expression xsi:type="Source">
+        <Source xsi:type="q1:KinectSource" />
+      </Expression>
+      <Expression xsi:type="NullSink" />
+      <Expression xsi:type="MemberSelector">
+        <Selector>
+          <string>ColorImage</string>
+        </Selector>
+      </Expression>
+    </Nodes>
+    <Edges>
+      <Edge>
+        <From>0</From>
+        <To>1</To>
+        <Label>Source</Label>
+      </Edge>
+      <Edge>
+        <From>0</From>
+        <To>2</To>
+        <Label>Source</Label>
+      </Edge>
+    </Edges>
+  </Workflow>
+  <ExtensionTypes>
+    <Type>ProjectNavi.Bonsai.Kinect.KinectSource, ProjectNavi.Bonsai.Kinect, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Type>
+  </ExtensionTypes>
+</WorkflowBuilder>
