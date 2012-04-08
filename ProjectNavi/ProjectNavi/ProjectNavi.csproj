@@ -119,6 +119,10 @@
       <Project>{7147D9B4-1A21-4208-9664-EA9C3984364F}</Project>
       <Name>Cyberiad</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ProjectNavi.Bonsai.Aruco\ProjectNavi.Bonsai.Aruco.csproj">
+      <Project>{BAB97FC6-D7B8-4E27-9EE2-5399F0CD5D30}</Project>
+      <Name>ProjectNavi.Bonsai.Aruco</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ProjectNavi.Bonsai.Kinect\ProjectNavi.Bonsai.Kinect.csproj">
       <Project>{97AB608E-E5D1-454F-BA18-D6C3716057E0}</Project>
       <Name>ProjectNavi.Bonsai.Kinect</Name>
