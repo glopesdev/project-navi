@@ -12,6 +12,14 @@ using Cyberiad.Graphics;
 using ProjectNavi.Entities;
 using ProjectNavi.Hardware;
 using Cyberiad;
+using Bonsai;
+using Bonsai.Expressions;
+using System.Xml;
+using System.Xml.Serialization;
+using System.Linq.Expressions;
+using OpenCV.Net;
+using Microsoft.Kinect;
+using ProjectNavi.Bonsai.Kinect;
 
 namespace ProjectNavi
 {
@@ -20,6 +28,8 @@ namespace ProjectNavi
     /// </summary>
     public class NaviControllerGame : Microsoft.Xna.Framework.Game
     {
+        ReactiveWorkflow vision;
+        IDisposable visionSubscription;
         GraphicsDeviceManager graphics;
         SpriteRenderer renderer;
         TaskScheduler scheduler;
@@ -45,7 +55,7 @@ namespace ProjectNavi
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            communication = new CommunicationManagerSerial("COM30", 9600);
+            communication = new CommunicationManagerSerial("COM12", 9600);
             base.Initialize();
         }
 
@@ -56,6 +66,21 @@ namespace ProjectNavi
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
+            using (var reader = XmlReader.Create("Vision.bonsai"))
+            {
+                var serializer = new XmlSerializer(typeof(WorkflowBuilder));
+                var workflowBuilder = (WorkflowBuilder)serializer.Deserialize(reader);
+                vision = workflowBuilder.Workflow.Build();
+                visionSubscription = vision.Load();
+
+                var connections = vision.Connections.ToArray();
+                var kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();
+
+                kinectStream.Subscribe(frame =>
+                {
+                    Console.WriteLine(frame);
+                });
+            }
 
             // TODO: use this.Content to load your game content here
             Grid.Create(this, renderer);
