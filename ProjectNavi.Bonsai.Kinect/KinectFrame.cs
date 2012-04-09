@@ -9,17 +9,17 @@ namespace ProjectNavi.Bonsai.Kinect
 {
     public class KinectFrame
     {
-        public KinectFrame(KinectSensor sensor, IplImage colorImage, SkeletonFrame skeletonFrame)
+        public KinectFrame(KinectSensor sensor, IplImage colorImage, Skeleton[] skeletonData)
         {
             Sensor = sensor;
             ColorImage = colorImage;
-            SkeletonFrame = skeletonFrame;
+            SkeletonData = skeletonData;
         }
 
         public KinectSensor Sensor { get; private set; }
 
         public IplImage ColorImage { get; private set; }
 
-        public SkeletonFrame SkeletonFrame { get; private set; }
+        public Skeleton[] SkeletonData { get; private set; }
     }
 }

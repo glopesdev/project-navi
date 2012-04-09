@@ -36,8 +36,8 @@ namespace ProjectNavi.Localization
 
         public void MarkerUpdate(KalmanFilter kalman, Vector<double> measurement)
         {
-            var noise = new DenseMatrix(new double[,]{{2000, 0},
-                                         {0, 2000},});
+            var noise = new DenseMatrix(new double[,]{{0.01, 0},
+                                         {0, 0.01},});
             kalman.Update(measurement, Measurement, MeasurementJacobian, noise);
         }
     }
