@@ -15,49 +15,66 @@ namespace ProjectNavi.Bonsai.Kinect
         KinectSensor kinect;
         byte[] colorImageBuffer;
 
+        Thread captureThread;
+        volatile bool running;
+        ManualResetEventSlim stop;
+
         protected override void Start()
         {
             kinect.Start();
+
+            running = true;
+            captureThread = new Thread(CaptureNewFrame);
+            captureThread.Start();
         }
 
         protected override void Stop()
         {
+            running = false;
+            stop.Wait();
+
             kinect.Stop();
         }
 
         public override IDisposable Load()
         {
+            stop = new ManualResetEventSlim();
             kinect = KinectSensor.KinectSensors.FirstOrDefault();
             kinect.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
             kinect.SkeletonStream.Enable();
-            kinect.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(kinect_AllFramesReady);
+            //kinect.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(kinect_AllFramesReady);
             return base.Load();
         }
 
-        void kinect_AllFramesReady(object sender, AllFramesReadyEventArgs e)
+        void CaptureNewFrame()
         {
-            using(var colorFrame = e.OpenColorImageFrame())
-            using (var skeletonFrame = e.OpenSkeletonFrame())
+            while (running)
             {
-                if (colorFrame != null && skeletonFrame != null)
+                using (var colorFrame = kinect.ColorStream.OpenNextFrame(50))
+                using (var skeletonFrame = kinect.SkeletonStream.OpenNextFrame(50))
                 {
-                    var bufferLength = colorFrame.Width * colorFrame.Height * colorFrame.BytesPerPixel;
-                    if (colorImageBuffer == null || colorImageBuffer.Length != bufferLength)
+                    if (colorFrame != null && skeletonFrame != null)
                     {
-                        colorImageBuffer = new byte[bufferLength];
-                    }
+                        var bufferLength = colorFrame.Width * colorFrame.Height * colorFrame.BytesPerPixel;
+                        if (colorImageBuffer == null || colorImageBuffer.Length != bufferLength)
+                        {
+                            colorImageBuffer = new byte[bufferLength];
+                        }
 
-                    var skeletonData = new Skeleton[skeletonFrame.SkeletonArrayLength];
-                    skeletonFrame.CopySkeletonDataTo(skeletonData);
-                    colorFrame.CopyPixelDataTo(colorImageBuffer);
-                    var bufferHandle = GCHandle.Alloc(colorImageBuffer, GCHandleType.Pinned);
-                    var image = new IplImage(new CvSize(colorFrame.Width, colorFrame.Height), colorFrame.BytesPerPixel * 8 / 4, 4, bufferHandle.AddrOfPinnedObject());
-                    var output = new IplImage(image.Size, image.Depth, 3);
-                    ImgProc.cvCvtColor(image, output, ColorConversion.BGRA2BGR);
-                    bufferHandle.Free();
-                    Subject.OnNext(new KinectFrame(kinect, output, skeletonData));
+                        var skeletonData = new Skeleton[skeletonFrame.SkeletonArrayLength];
+                        skeletonFrame.CopySkeletonDataTo(skeletonData);
+                        colorFrame.CopyPixelDataTo(colorImageBuffer);
+                        var bufferHandle = GCHandle.Alloc(colorImageBuffer, GCHandleType.Pinned);
+                        var image = new IplImage(new CvSize(colorFrame.Width, colorFrame.Height), colorFrame.BytesPerPixel * 8 / 4, 4, bufferHandle.AddrOfPinnedObject());
+                        var output = new IplImage(image.Size, image.Depth, 3);
+                        ImgProc.cvCvtColor(image, output, ColorConversion.BGRA2BGR);
+                        bufferHandle.Free();
+                        Subject.OnNext(new KinectFrame(kinect, output, skeletonData));
+                    }
                 }
             }
+
+            stop.Set();
         }
 
         protected override void Unload()
