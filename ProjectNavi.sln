@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectNavi.Bonsai.Kinect",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectNavi.Bonsai.Aruco", "ProjectNavi.Bonsai.Aruco\ProjectNavi.Bonsai.Aruco.csproj", "{BAB97FC6-D7B8-4E27-9EE2-5399F0CD5D30}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectNavi.Bonsai.Aruco.Design", "ProjectNavi.Bonsai.Aruco.Design\ProjectNavi.Bonsai.Aruco.Design.csproj", "{2DD91EA2-D3DD-41AC-9815-ADB490919948}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -211,6 +213,16 @@ Global
 		{BAB97FC6-D7B8-4E27-9EE2-5399F0CD5D30}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{BAB97FC6-D7B8-4E27-9EE2-5399F0CD5D30}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{BAB97FC6-D7B8-4E27-9EE2-5399F0CD5D30}.Release|x86.ActiveCfg = Release|Any CPU
+		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
