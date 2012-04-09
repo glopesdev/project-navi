@@ -102,7 +102,6 @@
     <Resource Include="Images\1ca08975-12d7-4326-ae19-c2f63f58f39a.png" />
     <Resource Include="Images\holeAlert.png" />
     <Resource Include="Images\bumpAlert.png" />
-    <Content Include="Skype4COM.dll" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="SKYPE4COMLib">
@@ -115,7 +114,6 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
