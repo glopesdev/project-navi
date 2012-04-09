@@ -20,6 +20,7 @@ using System.Linq.Expressions;
 using OpenCV.Net;
 using Microsoft.Kinect;
 using ProjectNavi.Bonsai.Kinect;
+using Aruco.Net;
 
 namespace ProjectNavi
 {
@@ -29,7 +30,7 @@ namespace ProjectNavi
     public class NaviControllerGame : Microsoft.Xna.Framework.Game
     {
         ReactiveWorkflow vision;
-        IDisposable visionSubscription;
+        IDisposable visionLoaded;
         GraphicsDeviceManager graphics;
         SpriteRenderer renderer;
         TaskScheduler scheduler;
@@ -71,20 +72,12 @@ namespace ProjectNavi
                 var serializer = new XmlSerializer(typeof(WorkflowBuilder));
                 var workflowBuilder = (WorkflowBuilder)serializer.Deserialize(reader);
                 vision = workflowBuilder.Workflow.Build();
-                visionSubscription = vision.Load();
-
-                var connections = vision.Connections.ToArray();
-                var kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();
-
-                kinectStream.Subscribe(frame =>
-                {
-                    Console.WriteLine(frame);
-                });
+                visionLoaded = vision.Load();
             }
 
             // TODO: use this.Content to load your game content here
             Grid.Create(this, renderer);
-            Magabot.Create(this, renderer, scheduler, communication);
+            Magabot.Create(this, renderer, scheduler, communication, vision);
         }
 
         /// <summary>
