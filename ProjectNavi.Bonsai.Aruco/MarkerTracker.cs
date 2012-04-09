@@ -6,10 +6,11 @@ using OpenCV.Net;
 using Bonsai;
 using Aruco.Net;
 using System.ComponentModel;
+using System.Xml.Serialization;
 
 namespace ProjectNavi.Bonsai.Aruco
 {
-    public class MarkerTracker : Projection<IplImage, IplImage>
+    public class MarkerTracker : Projection<IplImage, IEnumerable<Marker>>
     {
         CvMat cameraMatrix;
         CvMat distortion;
@@ -22,6 +23,13 @@ namespace ProjectNavi.Bonsai.Aruco
             Param2 = 7.0;
             ThresholdType = ThresholdMethod.AdaptiveThreshold;
             CornerRefinement = CornerRefinementMethod.Harris;
+        }
+
+        [XmlIgnore]
+        [Browsable(false)]
+        public CameraParameters Parameters
+        {
+            get { return parameters; }
         }
 
         [FileNameFilter("YML Files|*.yml;*.xml")]
@@ -38,7 +46,7 @@ namespace ProjectNavi.Bonsai.Aruco
 
         public float MarkerSize { get; set; }
 
-        public override IplImage Process(IplImage input)
+        public override IEnumerable<Marker> Process(IplImage input)
         {
             var hInput = input.DangerousGetHandle();
             var hCamMatrix = cameraMatrix != null ? cameraMatrix.DangerousGetHandle() : IntPtr.Zero;
@@ -48,19 +56,7 @@ namespace ProjectNavi.Bonsai.Aruco
             detector.Param2 = Param2;
             detector.CornerRefinement = CornerRefinement;
 
-            var markers = detector.Detect(hInput, hCamMatrix, hDistortion, MarkerSize);
-            var output = new IplImage(input.Size, 8, 3);
-            Core.cvCopy(input, output);
-            //detector.CopyThresholdedImage(output.DangerousGetHandle());
-            foreach (var marker in markers)
-            {
-                marker.Draw(output.DangerousGetHandle(), 0, 0, 255, 2, true);
-                if (parameters != null)
-                {
-                    CvDrawingUtils.Draw3dCube(output.DangerousGetHandle(), marker, parameters);
-                }
-            }
-            return output;
+            return detector.Detect(hInput, hCamMatrix, hDistortion, MarkerSize);
         }
 
         public override IDisposable Load()
