@@ -1,0 +1,54 @@
+﻿<Window x:Class="ProjectNavi.SkypeController.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="skypeRobotController" UseLayoutRounding="False" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="592.5" d:DesignWidth="700" MinWidth="720" MinHeight="150" SizeToContent="Height" Width="700" Height="320" Name="skypeRobotController">
+    <Canvas Name="MainCanvas" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="700" Height="280">
+        <Expander Canvas.Left="367" Canvas.Top="13" FontSize="16" Header="Sign in" Height="95" IsExpanded="True" Name="expanderSignIn" Width="323" Expanded="expanderSignIn_Expanded" Collapsed="expanderSignIn_Collapsed">
+            <Grid Height="71">
+                <Button Background="#FF357AE8" BorderBrush="White" BorderThickness="1" Click="buttonSignIn_Click" ClickMode="Press" Content="Activate Skype" FontSize="24" Foreground="White" Height="44" HorizontalAlignment="Left" Margin="17,13,0,0" Name="buttonSignIn" Padding="0" VerticalAlignment="Top" Width="298" />
+            </Grid>
+        </Expander>
+        <Expander Canvas.Left="368" Canvas.Top="123" Focusable="False" FontSize="16" Header="Chat" Height="305" IsExpanded="False" Name="expanderChat" Width="323" Expanded="expanderGoogleChat_Expanded" Collapsed="expanderGoogleChat_Collapsed">
+            <Grid Height="273">
+                <ListBox FontSize="12" Height="120" HorizontalAlignment="Left" Margin="7,50,0,0" Name="listEvents" SelectionChanged="listEvents_SelectionChanged" VerticalAlignment="Top" Width="308" />
+                <Label Content="Send message to" FontSize="12" FontStyle="Normal" FontWeight="Bold" HorizontalAlignment="Left" Margin="7,174,0,71" Name="labelSendMessage" Width="283" />
+                <ComboBox FontSize="11" Height="24" HorizontalAlignment="Right" Margin="0,178,6,0" Name="comboBoxOnlineFriends" SelectionChanged="comboBoxOnlineFriends_SelectionChanged" VerticalAlignment="Top" Width="203" />
+                <TextBox AcceptsReturn="True" FontSize="11" Height="26" HorizontalAlignment="Left" Margin="7,208,0,0" Name="textBoxMessage"  VerticalAlignment="Top" Width="308" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
+                <Button Click="buttonSendMessage_Click" Content="Send" FontSize="11" Height="22" HorizontalAlignment="Left" IsEnabled="False" Margin="228,246,0,0" Name="buttonSendMessage" VerticalAlignment="Top" Width="87" />
+                <Label Content="Selected user" FontSize="12" FontStyle="Normal" FontWeight="Bold" HorizontalAlignment="Left" Margin="7,10,0,235" Name="labelSelectedUser" Width="94.25" />
+                <ComboBox FontSize="11" Height="24" HorizontalAlignment="Left" Margin="93.25,14,0,0" Name="comboBoxSelectedUser" VerticalAlignment="Top" Width="196.75" SelectionChanged="comboBoxSelectedUser_SelectionChanged" IsEditable="False" />
+                <Button Background="#FFD14836" BorderBrush="White" BorderThickness="1" ClickMode="Press" Content="X" FontSize="15" Foreground="White" Height="24" HorizontalAlignment="Right" IsEnabled="False" Margin="0,14,6,0" Name="buttonUncheckSelectedUser" Padding="0" VerticalAlignment="Top" Visibility="Visible" Width="22.75" Click="buttonUncheckSelectedUser_Click" />
+                <Expander Header="Send Auto Messages" Height="126.11" HorizontalAlignment="Left" Margin="5.375,141.75,0,0" Name="expander1" VerticalAlignment="Top" Width="155" ExpandDirection="Up" FontSize="11" OpacityMask="White">
+                    <Grid Background="White">
+                        <CheckBox Content="failedToSendMessage" FontSize="12" Height="21" HorizontalAlignment="Left" IsEnabled="True" IsThreeState="False" Margin="6,79.14,0,0" Name="checkBoxSendFailedToSendMessage" VerticalAlignment="Top" Width="180" IsChecked="True" />
+                        <CheckBox Content="welcomeMessage" FontSize="12" Height="21" HorizontalAlignment="Left" IsEnabled="True" IsThreeState="False" Margin="6,1.5,0,0" Name="checkBoxSendWelcomeMessage" VerticalAlignment="Top" Width="180" IsChecked="True" />
+                        <CheckBox Content="waitMessage" FontSize="12" Height="21" HorizontalAlignment="Left" IsEnabled="True" IsThreeState="False" Margin="6,18.14,0,0" Name="checkBoxSendWaitMessage" VerticalAlignment="Top" Width="180" IsChecked="True" />
+                        <CheckBox Content="controllerMessage" FontSize="12" Height="21" HorizontalAlignment="Left" IsEnabled="True" IsThreeState="False" Margin="6,33.64,0,0" Name="checkBoxSendControllerMessage" VerticalAlignment="Top" Width="180" IsChecked="True" />
+                        <CheckBox Content="bumperMessage" FontSize="12" Height="21" HorizontalAlignment="Left" IsEnabled="True" IsThreeState="False" Margin="6,49.14,0,0" Name="checkBoxSendBumperMessage" VerticalAlignment="Top" Width="180" IsChecked="True" />
+                        <CheckBox Content="holeMessage" FontSize="12" Height="21" HorizontalAlignment="Left" IsEnabled="True" IsThreeState="False" Margin="6,65,0,0" Name="checkBoxSendHoleMessage" VerticalAlignment="Top" Width="180" IsChecked="True" />
+                    </Grid>
+                </Expander>
+            </Grid>
+        </Expander>
+        <Expander Canvas.Left="11" Canvas.Top="10" FontSize="16" Header="Serial Port" Height="89" IsExpanded="True" Name="expanderSerialPort" Width="323" Expanded="expanderSerialPort_Expanded" Collapsed="expanderSerialPort_Collapsed">
+            <Grid Height="62">
+                <ComboBox FontSize="13" Height="26" HorizontalAlignment="Left" Margin="16,18,0,0" Name="comboBoxSerialPort" SelectionChanged="comboBoxSerialPort_SelectionChanged" VerticalAlignment="Top" Width="101" />
+                <Button Click="buttonFindSerialPort_Click" Content="Find" FontSize="13" Height="26" IsEnabled="True" Margin="123,18,150,0" Name="buttonFindSerialPort" VerticalAlignment="Top" />
+                <Button Background="#FFD14836" BorderBrush="White" Click="buttonCloseSerialPort_Click" Content="Close" FontSize="13" Foreground="White" Height="26" HorizontalAlignment="Right" IsEnabled="False" Margin="0,18,22,0" Name="buttonCloseSerialPort" VerticalAlignment="Top" Width="53" />
+                <Button Background="#FF357AE8" BorderBrush="White" Click="buttonOpenSerialPort_Click" Content="Open" FontSize="13" Foreground="White" Height="26" IsEnabled="False" Margin="192,18,81,0" Name="buttonOpenSerialPort" VerticalAlignment="Top" />
+            </Grid>
+        </Expander>
+        <Expander AllowDrop="True" Canvas.Left="12" Canvas.Top="111" FontSize="16" Header="Controls" Height="433" IsExpanded="False" Name="expanderControls" Visibility="Visible" Expanded="expanderControls_Expanded" Collapsed="expanderControls_Collapsed">
+            <Grid>
+                <Button Click="buttonForward_Click" Content="Forward" FontSize="10" Height="50" HorizontalAlignment="Left" Margin="58,238,0,0" Name="buttonForward" VerticalAlignment="Top" Width="50" />
+                <Button Click="buttonStop_Click" Content="Stop" FontSize="10" Height="50" HorizontalAlignment="Left" Margin="58,290,0,0" Name="buttonStop" VerticalAlignment="Top" Width="50" />
+                <Button Click="buttonBackward_Click" Content="Backward" FontSize="10" Height="50" HorizontalAlignment="Left" Margin="58,341,0,0" Name="buttonBackward" VerticalAlignment="Top" Width="50" />
+                <Button Click="buttonLeft_Click" Content="Left" FontSize="10" Height="50" HorizontalAlignment="Left" Margin="6,290,0,0" Name="buttonLeft" VerticalAlignment="Top" Width="50" />
+                <Button Click="buttonRight_Click" Content="Right" FontSize="10" Height="50" HorizontalAlignment="Left" Margin="109,290,0,0" Name="buttonRight" VerticalAlignment="Top" Width="50" />
+                <Button Click="buttonAutonomousNavigation_Click" Content="Autonomous Navigation" FontSize="11" Grid.ColumnSpan="2" Height="52" HorizontalAlignment="Left" IsTabStop="True" Margin="176,288,0,0" Name="buttonAutonomousNavigation" VerticalAlignment="Top" Width="137" />
+                <TextBox FontSize="12" Grid.ColumnSpan="2" Height="208" HorizontalAlignment="Left" Margin="17,14,0,0" Name="textBoxSerial" TextChanged="textBoxSerial_TextChanged" VerticalAlignment="Top" VerticalScrollBarVisibility="Visible" Width="283" />
+            </Grid>
+        </Expander>
+    </Canvas>
+</Window>
+

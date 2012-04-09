@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectNavi.Bonsai.Aruco", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectNavi.Bonsai.Aruco.Design", "ProjectNavi.Bonsai.Aruco.Design\ProjectNavi.Bonsai.Aruco.Design.csproj", "{2DD91EA2-D3DD-41AC-9815-ADB490919948}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectNavi.SkypeController", "ProjectNavi.SkypeController\ProjectNavi.SkypeController.csproj", "{B464E46F-5B96-419C-BACB-05FC3E25E6B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -223,6 +225,16 @@ Global
 		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{2DD91EA2-D3DD-41AC-9815-ADB490919948}.Release|x86.ActiveCfg = Release|Any CPU
+		{B464E46F-5B96-419C-BACB-05FC3E25E6B6}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{B464E46F-5B96-419C-BACB-05FC3E25E6B6}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{B464E46F-5B96-419C-BACB-05FC3E25E6B6}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{B464E46F-5B96-419C-BACB-05FC3E25E6B6}.Debug|x86.ActiveCfg = Debug|x86
+		{B464E46F-5B96-419C-BACB-05FC3E25E6B6}.Debug|x86.Build.0 = Debug|x86
+		{B464E46F-5B96-419C-BACB-05FC3E25E6B6}.Release|Any CPU.ActiveCfg = Release|x86
+		{B464E46F-5B96-419C-BACB-05FC3E25E6B6}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{B464E46F-5B96-419C-BACB-05FC3E25E6B6}.Release|Mixed Platforms.Build.0 = Release|x86
+		{B464E46F-5B96-419C-BACB-05FC3E25E6B6}.Release|x86.ActiveCfg = Release|x86
+		{B464E46F-5B96-419C-BACB-05FC3E25E6B6}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
