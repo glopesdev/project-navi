@@ -19,12 +19,12 @@ namespace ProjectNavi.Hardware
         float accelerationWeight = 1f;
         float breakingWeight = 0.1f;
 
-        public DifferentialSteeringBoard(ICommunicationManager communicationManager, double wheelRadius)
-            : this(communicationManager, wheelRadius, 1f, 0.1f)
+        public DifferentialSteeringBoard(ICommunicationManager communicationManager, double wheelRadius, int wheelClicks)
+            : this(communicationManager, wheelRadius, wheelClicks, 1f, 1f)
         {
         }
 
-        public DifferentialSteeringBoard(ICommunicationManager communicationManager, double wheelRadius, float accelerationWeight, float breakingWeight)
+        public DifferentialSteeringBoard(ICommunicationManager communicationManager, double wheelRadius, int wheelClicks, float accelerationWeight, float breakingWeight)
         {
             previousVelocity = new WheelVelocity();
             currentVelocity = new WheelVelocity();
@@ -33,11 +33,13 @@ namespace ProjectNavi.Hardware
                               where command.EventArgs.UserState == this
                               select ParseMotorActuatorResponse(command.EventArgs.Response);
             WheelRadius = wheelRadius;
+            WheelClicks = wheelClicks; ; 
 
             this.accelerationWeight = accelerationWeight;
             this.breakingWeight = breakingWeight;
         }
         public double WheelRadius { get; private set; }
+        public int WheelClicks { get; private set; }
 
         public IObservable<DifferentialSteeringResponse> CommandChecksum { get; private set; }
 
@@ -68,26 +70,18 @@ namespace ProjectNavi.Hardware
             var left = previousVelocity.LeftVelocity + (leftWeight * (currentVelocity.LeftVelocity - previousVelocity.LeftVelocity));
             var right = previousVelocity.RightVelocity + (rightWeight * (currentVelocity.RightVelocity - previousVelocity.RightVelocity));
             previousVelocity = new WheelVelocity(left, right);
-            var command = ParseUpdateWheelVelocity(previousVelocity, SetWheelVelocityCode);
+            var command = ParseUpdateWheelVelocity(previousVelocity, SetWheelVelocityCode, WheelClicks);
             manager.CommandAsync(command, 0, this);
         }
 
-        public static byte[] ParseUpdateWheelVelocity(WheelVelocity wheelVelocity, byte setWheelVelocityCode)
+        public static byte[] ParseUpdateWheelVelocity(WheelVelocity wheelVelocity, byte setWheelVelocityCode, int wheelClicks)
         {
-            int minValue = 30;
             var velocity = wheelVelocity;
             //1050 ex 588 clicks por tempo de amostragem
-            short leftVelocity = (short)(-velocity.LeftVelocity * 1050 / (2 * Math.PI));
-            short rightVelocity = (short)(velocity.RightVelocity * 1050 / (2 * Math.PI));
+            short leftVelocity = (short)-velocity.LeftVelocity;
+            short rightVelocity = (short)velocity.RightVelocity;
 
-            if (leftVelocity != 0 && Math.Abs(leftVelocity) < minValue)
-            {
-                leftVelocity = (short)(Math.Sign((int)leftVelocity) * minValue);
-            }
-            if (rightVelocity != 0 && Math.Abs(rightVelocity) < minValue)
-            {
-                rightVelocity = (short)(Math.Sign((int)rightVelocity) * minValue);
-            }
+           
             //Trace.WriteLine(leftVelocity + " " + rightVelocity);
             var command = new byte[5];
             command[0] = setWheelVelocityCode;

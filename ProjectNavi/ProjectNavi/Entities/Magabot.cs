@@ -67,7 +67,7 @@ namespace ProjectNavi.Entities
                     let ground = new GroundSensorBoard(communication)
                     let leds = new LedBoard(communication)
                     let sonars = new SonarsBoard(communication)
-                    let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius)
+                    let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius,wheelClicks)
                     let odometry = new OdometryBoard(communication, wheelClicks, wheelRadius, wheelDistance)
                     let magabotState = new MagabotState(leds, differentialSteering)
                     let skype = new MainWindow()
@@ -81,7 +81,7 @@ namespace ProjectNavi.Entities
                     }
                     let behavior = scheduler.TaskUpdate
                                             .Do(time => odometry.UpdateOdometryCommand())
-                                            .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-3, -3)))
+                                            .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-20, -20)))
                                             .Do(time => magabotState.Leds.SetLedBoardState(255, 0, 0))
                                             .Do(time => skype.Show())
                                             .Do(time => skype.Magabot = magabotState)
