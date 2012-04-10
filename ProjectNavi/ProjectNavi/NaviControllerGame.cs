@@ -21,6 +21,7 @@ using OpenCV.Net;
 using Microsoft.Kinect;
 using ProjectNavi.Bonsai.Kinect;
 using Aruco.Net;
+using ProjectNavi.SkypeController;
 
 namespace ProjectNavi
 {
@@ -72,7 +73,8 @@ namespace ProjectNavi
             //    var serializer = new XmlSerializer(typeof(WorkflowBuilder));
             //    var workflowBuilder = (WorkflowBuilder)serializer.Deserialize(reader);
             //    vision = workflowBuilder.Workflow.Build();
-                visionLoaded = vision.Load();
+            
+                //visionLoaded = vision.Load();
 
             //    var connections = vision.Connections.ToArray();
             //    var kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();

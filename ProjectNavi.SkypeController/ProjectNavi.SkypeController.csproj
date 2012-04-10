@@ -104,6 +104,12 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProjectNavi.Hardware\ProjectNavi.Hardware.csproj">
+      <Project>{3E95CEB5-089F-4035-B064-1AB9635823BB}</Project>
+      <Name>ProjectNavi.Hardware</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
