@@ -111,15 +111,9 @@ namespace ProjectNavi.SkypeController
                                 {
                                     int sameItemNumber = 0;
                                     int i = 0;
-                                    while (i < comboBoxSelectedUser.Items.Count)
-                                    {
-                                        if (call.PartnerHandle == comboBoxSelectedUser.Items.GetItemAt(i).ToString())
-                                            sameItemNumber++;
+                                   
 
-                                        i++;
-                                    }
-
-                                    if (sameItemNumber == 0) // New user
+                                    if (!comboBoxSelectedUser.Items.Cast<string>().Contains(call.PartnerHandle)) // New user
                                     {
                                         comboBoxSelectedUser.Items.Add(call.PartnerHandle);
 
@@ -241,7 +235,7 @@ namespace ProjectNavi.SkypeController
                             i++;
                         }
 
-                        if (sameItemNumber == 0) // New chat
+                        if (!comboBoxSelectedUser.Items.Cast<string>().Contains(msg.Sender.Handle)) // New chat
                         {
                             comboBoxSelectedUser.Items.Add(msg.Sender.Handle);
 
@@ -256,16 +250,21 @@ namespace ProjectNavi.SkypeController
 
                         if (msg.Sender.Handle == comboBoxSelectedUser.SelectedItem.ToString() && msg.Sender.Handle != "") // Message from the selected user
                         {
-                            if (msg.Body == "w")
-                                SetDirection('w', "User");
-                            else if (msg.Body == "s")
-                                SetDirection('s', "User");
-                            else if (msg.Body == "a")
-                                SetDirection('a', "User");
-                            else if (msg.Body == "d")
-                                SetDirection('d', "User");
-                            else if (msg.Body == "p")
-                                SetDirection('p', "User");
+                            switch (msg.Body)
+                            {
+                                case "w": SetDirection('w', "User");
+                                    break;
+                                case "s": SetDirection('s', "User");
+                                    break;
+                                case "a": SetDirection('a', "User");
+                                    break;
+                                case "d": SetDirection('d', "User");
+                                    break;
+                                case "p": SetDirection('p', "User");
+                                    break;
+                                default: SetDirection('p', "User");
+                                    break;
+                            }
                         }
                         else // Message from other User
                         {
@@ -333,31 +332,33 @@ namespace ProjectNavi.SkypeController
 
                 //if(direction != lastDirectionSet)
                 //{
-                    if (direction == 'a')
-                    {
+                switch(direction)
+                {
+                    case 'a':
                         msg = "a - left";
                         Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(spinVelocity, -spinVelocity));
-                    }
-                    else if (direction == 'd')
-                    {
+                        break;
+                    case 'd':
                         msg = "d - right";
                         Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-spinVelocity,spinVelocity));
-                    }
-                    else if (direction == 'w')
-                    {
+                        break;
+                    case 'w':
                         msg = "w - up";
                         Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(mainVelocity,mainVelocity));
-                    }
-                    else if (direction == 's')
-                    {
+                        break;
+                    case 's':
                         msg = "s - down";
                         Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-mainVelocity,-mainVelocity));
-                    }
-                    else if (direction == 'p')
-                    {
+                        break;
+                    case 'p':   
                         msg = "p - stop";
                         Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0,0));
-                    }
+                        break;
+                    default :
+                        msg = "p - stop";
+                        Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0,0));
+                        break;
+                }
                 //}
 
                 lastDirectionSet = direction;
