@@ -49,7 +49,7 @@ namespace ProjectNavi.Hardware
         public BumpersMeasurement(bool bumperLeft, bool bumperRight)
         {
             this.bumperLeft = bumperLeft;
-            this.bumperRight = bumperLeft;
+            this.bumperRight = bumperRight;
         }
 
         public bool BumperLeft
