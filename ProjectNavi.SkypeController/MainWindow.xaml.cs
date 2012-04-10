@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Threading;
 using System.IO.Ports;
+using ProjectNavi.Hardware;
 using SKYPE4COMLib;
 
 namespace ProjectNavi.SkypeController
@@ -32,7 +33,7 @@ namespace ProjectNavi.SkypeController
         int callID;
 
         //public SerialPort serialPort;
-        private System.IO.Ports.SerialPort serialPort;
+        public MagabotState Magabot {get; set;}
 
         bool isAssistedNavigation = false;
 
@@ -53,8 +54,7 @@ namespace ProjectNavi.SkypeController
                     comboBoxSerialPort.Items.Add(str);
             }
 
-            serialPort = new SerialPort();
-
+         
             Properties.Settings.Default.Reload();
         }
 
@@ -143,39 +143,40 @@ namespace ProjectNavi.SkypeController
 
                         if (msg.Sender.Handle == comboBoxSelectedUser.SelectedItem.ToString() && msg.Sender.Handle != "") // Message from the selected user
                         {
-                            if (serialPort.IsOpen == true)
-                            {
-                                if (msg.Body.Contains('2'))
-                                    isAssistedNavigation = false;
-                                else if (msg.Body.Contains('1'))
-                                    isAssistedNavigation = true;
+                        //    if (serialPort.IsOpen == true)
+                        //    {
+                        //        if (msg.Body.Contains('2'))
+                        //            isAssistedNavigation = false;
+                        //        else if (msg.Body.Contains('1'))
+                        //            isAssistedNavigation = true;
 
-                                if (!msg.Body.Contains('1') && !msg.Body.Contains('2') && isAssistedNavigation == false)
-                                {
-                                    serialPort.WriteLine("1");
-                                    textBoxSerial.Text += string.Format("S: {0} \r\n", '1');
-                                    isAssistedNavigation = true;
-                                }
+                        //        if (!msg.Body.Contains('1') && !msg.Body.Contains('2') && isAssistedNavigation == false)
+                        //        {
+                        //            serialPort.WriteLine("1");
+                        //            textBoxSerial.Text += string.Format("S: {0} \r\n", '1');
+                        //            isAssistedNavigation = true;
+                        //        }
 
 
-                                serialPort.Write(msg.Body.ToCharArray(), 0, 1);
-                                textBoxSerial.Text += string.Format("S: {0} \r\n", msg.Body);
-                            }
-                            else
-                            {
-                                if (!msg.Body.Contains('1') && !msg.Body.Contains('2') && isAssistedNavigation == false)
-                                {
-                                    if (serialPort.IsOpen == true) serialPort.WriteLine("1");
-                                    textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", '1');
-                                    //isAssistedNavigation = true;
-                                }
+                        //        serialPort.Write(msg.Body.ToCharArray(), 0, 1);
+                        //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg.Body);
+                        //    }
+                        //    else
+                        //    {
+                        //        if (!msg.Body.Contains('1') && !msg.Body.Contains('2') && isAssistedNavigation == false)
+                        //        {
+                        //            if (serialPort.IsOpen == true) serialPort.WriteLine("1");
+                        //            textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", '1');
+                        //            //isAssistedNavigation = true;
+                        //        }
 
-                                if (checkBoxSendFailedToSendMessage.IsChecked == true)
-                                {
-                                    textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg.Body);
-                                    msg.Chat.SendMessage(Properties.Settings.Default.failedToSendMessage);
-                                }
-                            }
+                        //        if (checkBoxSendFailedToSendMessage.IsChecked == true)
+                        //        {
+                        //            textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg.Body);
+                        //            msg.Chat.SendMessage(Properties.Settings.Default.failedToSendMessage);
+                        //        }
+                        //    }
+                        
                         }
                         else // Message from other User
                         {
@@ -271,36 +272,36 @@ namespace ProjectNavi.SkypeController
                     listEvents.Items.Add(String.Format("Code DTMF from {0}: {1}", call.PartnerHandle, code));
                     listEvents.SelectedIndex = listEvents.Items.Count - 1;
 
-                    if (serialPort.IsOpen == true)
-                    {
-                        if (msg == "2")
-                            isAssistedNavigation = false;
-                        else if (msg == "1")
-                            isAssistedNavigation = true;
+                    //if (serialPort.IsOpen == true)
+                    //{
+                    //    if (msg == "2")
+                    //        isAssistedNavigation = false;
+                    //    else if (msg == "1")
+                    //        isAssistedNavigation = true;
 
-                        if (msg != "1" && msg != "2" && isAssistedNavigation == false)
-                        {
-                            serialPort.WriteLine("1");
-                            textBoxSerial.Text += string.Format("S: {0} \r\n", "1");
-                            isAssistedNavigation = true;
-                        }
+                    //    if (msg != "1" && msg != "2" && isAssistedNavigation == false)
+                    //    {
+                    //        serialPort.WriteLine("1");
+                    //        textBoxSerial.Text += string.Format("S: {0} \r\n", "1");
+                    //        isAssistedNavigation = true;
+                    //    }
 
-                        serialPort.Write(msg);
-                        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                    }
-                    else
-                    {
-                        if (msg != "1" && msg != "2" && isAssistedNavigation == false)
-                        {
-                            textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", "1");
-                        }
+                    //    serialPort.Write(msg);
+                    //    textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+                    //}
+                    //else
+                    //{
+                    //    if (msg != "1" && msg != "2" && isAssistedNavigation == false)
+                    //    {
+                    //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", "1");
+                    //    }
 
-                        if (checkBoxSendFailedToSendMessage.IsChecked == true)
-                        {
-                            textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                            skype.SendMessage(comboBoxSelectedUser.Text, Properties.Settings.Default.failedToSendMessage);
-                        }
-                    }
+                    //    if (checkBoxSendFailedToSendMessage.IsChecked == true)
+                    //    {
+                    //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+                    //        skype.SendMessage(comboBoxSelectedUser.Text, Properties.Settings.Default.failedToSendMessage);
+                    //    }
+                    //}
                 }
                 catch (Exception e)
                 {
@@ -313,120 +314,120 @@ namespace ProjectNavi.SkypeController
         #region Serial Port
         private void comboBoxSerialPort_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _dispatcher.BeginInvoke((Action)(() =>
-            {
-                serialPort.PortName = comboBoxSerialPort.SelectedItem.ToString();
+            //_dispatcher.BeginInvoke((Action)(() =>
+            //{
+            //    serialPort.PortName = comboBoxSerialPort.SelectedItem.ToString();
 
-                //open serial port
-                serialPort.Open();
-                comboBoxSerialPort.IsEnabled = false;
-                buttonCloseSerialPort.IsEnabled = true;
-                buttonFindSerialPort.IsEnabled = false;
-                buttonOpenSerialPort.IsEnabled = false;
+            //    //open serial port
+            //    serialPort.Open();
+            //    comboBoxSerialPort.IsEnabled = false;
+            //    buttonCloseSerialPort.IsEnabled = true;
+            //    buttonFindSerialPort.IsEnabled = false;
+            //    buttonOpenSerialPort.IsEnabled = false;
 
-                serialPort.DataReceived += new SerialDataReceivedEventHandler(serialPort_DataReceived);
+            //    serialPort.DataReceived += new SerialDataReceivedEventHandler(serialPort_DataReceived);
 
-                expanderControls.IsExpanded = true;
-                expanderSerialPort.IsExpanded = false;
-            }));
+            //    expanderControls.IsExpanded = true;
+            //    expanderSerialPort.IsExpanded = false;
+            //}));
         }
 
         private void buttonFindSerialPort_Click(object sender, RoutedEventArgs e)
         {
-            //availabe COM ports
-            SerialPort tmp;
-            foreach (string str in SerialPort.GetPortNames())
-            {
-                tmp = new SerialPort(str);
+            ////availabe COM ports
+            //SerialPort tmp;
+            //foreach (string str in SerialPort.GetPortNames())
+            //{
+            //    tmp = new SerialPort(str);
 
-                int sameItemNumber = 0;
-                int i = 0;
-                while (i < comboBoxSerialPort.Items.Count)
-                {
-                    if (str == comboBoxSerialPort.Items.GetItemAt(i).ToString())
-                        sameItemNumber++;
+            //    int sameItemNumber = 0;
+            //    int i = 0;
+            //    while (i < comboBoxSerialPort.Items.Count)
+            //    {
+            //        if (str == comboBoxSerialPort.Items.GetItemAt(i).ToString())
+            //            sameItemNumber++;
 
-                    i++;
-                }
+            //        i++;
+            //    }
 
-                if (sameItemNumber == 0)
-                {
-                    if (tmp.IsOpen == false)
-                        comboBoxSerialPort.Items.Add(str);
-                }
-            }
+            //    if (sameItemNumber == 0)
+            //    {
+            //        if (tmp.IsOpen == false)
+            //            comboBoxSerialPort.Items.Add(str);
+            //    }
+            //}
         }
 
         private void serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            // blocks until TERM_CHAR is received
-            string msg = serialPort.ReadExisting();
+            //// blocks until TERM_CHAR is received
+            //string msg = serialPort.ReadExisting();
 
-            if (msg[0] == 'i')
-            {
-                _dispatcher.BeginInvoke((Action)(() =>
-                {
-                    if (comboBoxSelectedUser.SelectedItem != null && checkBoxSendHoleMessage.IsChecked == true)
-                    {
-                        skype.SendMessage(comboBoxSelectedUser.SelectedItem.ToString(), Properties.Settings.Default.holeMessage);
-                    }
+            //if (msg[0] == 'i')
+            //{
+            //    _dispatcher.BeginInvoke((Action)(() =>
+            //    {
+            //        if (comboBoxSelectedUser.SelectedItem != null && checkBoxSendHoleMessage.IsChecked == true)
+            //        {
+            //            skype.SendMessage(comboBoxSelectedUser.SelectedItem.ToString(), Properties.Settings.Default.holeMessage);
+            //        }
 
-                    textBoxSerial.Text += string.Format("R: {0}", msg);
-                    textBoxSerial.ScrollToEnd();
-                }));
-            }
-            else if (msg[0] == 'b')
-            {
-                _dispatcher.BeginInvoke((Action)(() =>
-                {
-                    if (comboBoxSelectedUser.SelectedItem != null && checkBoxSendBumperMessage.IsChecked == true)
-                    {
-                        skype.SendMessage(comboBoxSelectedUser.SelectedItem.ToString(), Properties.Settings.Default.bumperMessage);
-                    }
+            //        textBoxSerial.Text += string.Format("R: {0}", msg);
+            //        textBoxSerial.ScrollToEnd();
+            //    }));
+            //}
+            //else if (msg[0] == 'b')
+            //{
+            //    _dispatcher.BeginInvoke((Action)(() =>
+            //    {
+            //        if (comboBoxSelectedUser.SelectedItem != null && checkBoxSendBumperMessage.IsChecked == true)
+            //        {
+            //            skype.SendMessage(comboBoxSelectedUser.SelectedItem.ToString(), Properties.Settings.Default.bumperMessage);
+            //        }
 
-                    textBoxSerial.Text += string.Format("R: {0}", msg);
-                    textBoxSerial.ScrollToEnd();
-                }));
-            }
+            //        textBoxSerial.Text += string.Format("R: {0}", msg);
+            //        textBoxSerial.ScrollToEnd();
+            //    }));
+            //}
         }
 
         private void buttonCloseSerialPort_Click(object sender, RoutedEventArgs e)
         {
-            serialPort.Close();
+            //serialPort.Close();
 
-            _dispatcher.BeginInvoke((Action)(() =>
-            {
-                serialPort.Close();
+            //_dispatcher.BeginInvoke((Action)(() =>
+            //{
+            //    serialPort.Close();
 
-                buttonCloseSerialPort.IsEnabled = false;
-                buttonFindSerialPort.IsEnabled = true;
-                buttonOpenSerialPort.IsEnabled = true;
-                comboBoxSerialPort.IsEnabled = true;
-                expanderControls.IsExpanded = false;
-            }));
+            //    buttonCloseSerialPort.IsEnabled = false;
+            //    buttonFindSerialPort.IsEnabled = true;
+            //    buttonOpenSerialPort.IsEnabled = true;
+            //    comboBoxSerialPort.IsEnabled = true;
+            //    expanderControls.IsExpanded = false;
+            //}));
 
 
         }
 
         private void buttonOpenSerialPort_Click(object sender, RoutedEventArgs e)
         {
-            _dispatcher.BeginInvoke((Action)(() =>
-            {
-                serialPort.PortName = comboBoxSerialPort.SelectedItem.ToString();
+            //_dispatcher.BeginInvoke((Action)(() =>
+            //{
+            //    serialPort.PortName = comboBoxSerialPort.SelectedItem.ToString();
 
-                //open serial port
-                serialPort.Open();
+            //    //open serial port
+            //    serialPort.Open();
 
-                comboBoxSerialPort.IsEnabled = false;
-                buttonCloseSerialPort.IsEnabled = true;
-                buttonOpenSerialPort.IsEnabled = false;
-                buttonFindSerialPort.IsEnabled = false;
+            //    comboBoxSerialPort.IsEnabled = false;
+            //    buttonCloseSerialPort.IsEnabled = true;
+            //    buttonOpenSerialPort.IsEnabled = false;
+            //    buttonFindSerialPort.IsEnabled = false;
 
-                serialPort.DataReceived += new SerialDataReceivedEventHandler(serialPort_DataReceived);
+            //    serialPort.DataReceived += new SerialDataReceivedEventHandler(serialPort_DataReceived);
 
-                expanderControls.IsExpanded = true;
-                expanderSerialPort.IsExpanded = false;
-            }));
+            //    expanderControls.IsExpanded = true;
+            //    expanderSerialPort.IsExpanded = false;
+            //}));
         }
 
         private void textBoxSerial_TextChanged(object sender, TextChangedEventArgs e)
@@ -494,108 +495,108 @@ namespace ProjectNavi.SkypeController
         {
             if (isAssistedNavigation == false)
             {
-                _dispatcher.BeginInvoke((Action)(() =>
-                {
-                    String msg = "1";
-                    if (serialPort.IsOpen)
-                    {
-                        serialPort.WriteLine(msg);
-                        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                    }
-                    else
-                    {
-                        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                    }
-                }));
+                //_dispatcher.BeginInvoke((Action)(() =>
+                //{
+                //    String msg = "1";
+                //    if (serialPort.IsOpen)
+                //    {
+                //        serialPort.WriteLine(msg);
+                //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+                //    }
+                //    else
+                //    {
+                //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+                //    }
+                //}));
 
                 isAssistedNavigation = true;
             }
 
-            _dispatcher.BeginInvoke((Action)(() =>
-            {
-                String msg = "w";
-                if (serialPort.IsOpen)
-                {
-                    serialPort.WriteLine(msg);
-                    textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                }
-                else
-                {
-                    textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                }
-            }));
+            //_dispatcher.BeginInvoke((Action)(() =>
+            //{
+            //    String msg = "w";
+            //    if (serialPort.IsOpen)
+            //    {
+            //        serialPort.WriteLine(msg);
+            //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+            //    }
+            //    else
+            //    {
+            //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+            //    }
+            //}));
         }
 
         private void buttonStop_Click(object sender, RoutedEventArgs e)
         {
             if (isAssistedNavigation == false)
             {
-                _dispatcher.BeginInvoke((Action)(() =>
-                {
-                    String msg = "1";
-                    if (serialPort.IsOpen)
-                    {
-                        serialPort.WriteLine(msg);
-                        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                    }
-                    else
-                    {
-                        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                    }
-                }));
+                //_dispatcher.BeginInvoke((Action)(() =>
+                //{
+                //    String msg = "1";
+                //    if (serialPort.IsOpen)
+                //    {
+                //        serialPort.WriteLine(msg);
+                //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+                //    }
+                //    else
+                //    {
+                //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+                //    }
+                //}));
 
                 isAssistedNavigation = true;
             }
 
-            _dispatcher.BeginInvoke((Action)(() =>
-            {
-                String msg = "p";
-                if (serialPort.IsOpen)
-                {
-                    serialPort.WriteLine(msg);
-                    textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                }
-                else
-                {
-                    textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                }
-            }));
+            //_dispatcher.BeginInvoke((Action)(() =>
+            //{
+            //    String msg = "p";
+            //    if (serialPort.IsOpen)
+            //    {
+            //        serialPort.WriteLine(msg);
+            //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+            //    }
+            //    else
+            //    {
+            //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+            //    }
+            //}));
         }
 
         private void buttonBackward_Click(object sender, RoutedEventArgs e)
         {
             if (isAssistedNavigation == false)
             {
-                _dispatcher.BeginInvoke((Action)(() =>
-                {
-                    String msg = "1";
-                    if (serialPort.IsOpen)
-                    {
-                        serialPort.WriteLine(msg);
-                        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                    }
-                    else
-                    {
-                        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                    }
-                }));
+                //_dispatcher.BeginInvoke((Action)(() =>
+                //{
+                //    String msg = "1";
+                //    if (serialPort.IsOpen)
+                //    {
+                //        serialPort.WriteLine(msg);
+                //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+                //    }
+                //    else
+                //    {
+                //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+                //    }
+                //}));
 
                 isAssistedNavigation = true;
             }
 
-            _dispatcher.BeginInvoke((Action)(() =>
-            {
-                String msg = "s";
-                if (serialPort.IsOpen)
-                {
-                    serialPort.WriteLine(msg);
-                    textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                }
-                else
-                {
-                    textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                }
-            }));
+            //_dispatcher.BeginInvoke((Action)(() =>
+            //{
+            //    String msg = "s";
+            //    if (serialPort.IsOpen)
+            //    {
+            //        serialPort.WriteLine(msg);
+            //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+            //    }
+            //    else
+            //    {
+            //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+            //    }
+            //}));
 
         }
 
@@ -603,91 +604,91 @@ namespace ProjectNavi.SkypeController
         {
             if (isAssistedNavigation == false)
             {
-                _dispatcher.BeginInvoke((Action)(() =>
-                {
-                    String msg = "1";
-                    if (serialPort.IsOpen)
-                    {
-                        serialPort.WriteLine(msg);
-                        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                    }
-                    else
-                    {
-                        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                    }
-                }));
+                //_dispatcher.BeginInvoke((Action)(() =>
+                //{
+                //    String msg = "1";
+                //    if (serialPort.IsOpen)
+                //    {
+                //        serialPort.WriteLine(msg);
+                //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+                //    }
+                //    else
+                //    {
+                //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+                //    }
+                //}));
 
                 isAssistedNavigation = true;
             }
 
-            _dispatcher.BeginInvoke((Action)(() =>
-            {
-                String msg = "a";
-                if (serialPort.IsOpen)
-                {
-                    serialPort.WriteLine(msg);
-                    textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                }
-                else
-                {
-                    textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                }
-            }));
+            //_dispatcher.BeginInvoke((Action)(() =>
+            //{
+            //    String msg = "a";
+            //    if (serialPort.IsOpen)
+            //    {
+            //        serialPort.WriteLine(msg);
+            //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+            //    }
+            //    else
+            //    {
+            //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+            //    }
+            //}));
         }
 
         private void buttonRight_Click(object sender, RoutedEventArgs e)
         {
             if (isAssistedNavigation == false)
             {
-                _dispatcher.BeginInvoke((Action)(() =>
-                {
-                    String msg = "1";
-                    if (serialPort.IsOpen)
-                    {
-                        serialPort.WriteLine(msg);
-                        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                    }
-                    else
-                    {
-                        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                    }
-                }));
+                //_dispatcher.BeginInvoke((Action)(() =>
+                //{
+                //    String msg = "1";
+                //    if (serialPort.IsOpen)
+                //    {
+                //        serialPort.WriteLine(msg);
+                //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+                //    }
+                //    else
+                //    {
+                //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+                //    }
+                //}));
 
                 isAssistedNavigation = true;
             }
 
-            _dispatcher.BeginInvoke((Action)(() =>
-            {
-                String msg = "d";
-                if (serialPort.IsOpen)
-                {
-                    serialPort.WriteLine(msg);
-                    textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                }
-                else
-                {
-                    textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                }
-            }));
+            //_dispatcher.BeginInvoke((Action)(() =>
+            //{
+            //    String msg = "d";
+            //    if (serialPort.IsOpen)
+            //    {
+            //        serialPort.WriteLine(msg);
+            //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+            //    }
+            //    else
+            //    {
+            //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+            //    }
+            //}));
         }
 
         private void buttonAutonomousNavigation_Click(object sender, RoutedEventArgs e)
         {
             isAssistedNavigation = false;
 
-            _dispatcher.BeginInvoke((Action)(() =>
-            {
-                String msg = "2";
-                if (serialPort.IsOpen)
-                {
-                    serialPort.WriteLine(msg);
-                    textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
-                }
-                else
-                {
-                    textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
-                }
-            }));
+            //_dispatcher.BeginInvoke((Action)(() =>
+            //{
+            //    String msg = "2";
+            //    if (serialPort.IsOpen)
+            //    {
+            //        serialPort.WriteLine(msg);
+            //        textBoxSerial.Text += string.Format("S: {0} \r\n", msg);
+            //    }
+            //    else
+            //    {
+            //        textBoxSerial.Text += string.Format("Failed to Send: {0} \r\n", msg);
+            //    }
+            //}));
         }
         #endregion
 

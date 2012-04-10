@@ -16,6 +16,7 @@ using Bonsai;
 using System.Linq.Expressions;
 using ProjectNavi.Bonsai.Kinect;
 using Aruco.Net;
+using ProjectNavi.SkypeController;
 
 namespace ProjectNavi.Entities
 {
@@ -39,19 +40,20 @@ namespace ProjectNavi.Entities
 
         public static IDisposable Create(Game game, SpriteRenderer renderer, TaskScheduler scheduler, ICommunicationManager communication, ReactiveWorkflow vision)
         {
-            var connections = vision.Connections.ToArray();
+            //var connections = vision.Connections.ToArray();
             //var kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();
-            var markerStream = Expression.Lambda<Func<IObservable<IEnumerable<Marker>>>>(connections[0]).Compile()();
+            //var markerStream = Expression.Lambda<Func<IObservable<IEnumerable<Marker>>>>(connections[0]).Compile()();
 
             return (from magabot in Enumerable.Range(0, 1)
                     let wheelClicks = 3900
                     let wheelDistance = 0.345f
                     let wheelRadius = 0.0467f
-                    let marker0 = new MarkerLocalization
+                   /* let marker0 = new MarkerLocalization
                     {
                         MarkerPosition = new DenseVector(new[] { .0, .0 }),
                         SensorOffset = new DenseVector(new[] { .1, .0 }),
                     }
+                    */
                     let markerText = new StringBuilder()
                     let text = new StringBuilder()
                     let transform = new Transform2D()
@@ -68,6 +70,7 @@ namespace ProjectNavi.Entities
                     let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius)
                     let odometry = new OdometryBoard(communication, wheelClicks, wheelRadius, wheelDistance)
                     let magabotState = new MagabotState(leds, differentialSteering)
+                    let skype = new MainWindow()
                     let kalman = new KalmanFilter
                     {
                         Mean = new DenseVector(3),
@@ -80,6 +83,8 @@ namespace ProjectNavi.Entities
                                             .Do(time => odometry.UpdateOdometryCommand())
                                             .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-3, -3)))
                                             .Do(time => magabotState.Leds.SetLedBoardState(255, 0, 0))
+                                            .Do(time => skype.Show())
+                                            .Do(time => skype.Magabot = magabotState)
                                             .Take(1)
                     select new CompositeDisposable(
                         bumpers,
@@ -95,22 +100,22 @@ namespace ProjectNavi.Entities
                         //renderer.SubscribeText(transform, font, () => text.ToString()),
                         renderer.SubscribeText(new Transform2D(-Vector2.One, 0, Vector2.One), font, () => markerText.ToString()),
                         behavior.Subscribe(),
-                        markerStream.Subscribe(markers =>
-                        {
-                            foreach (var marker in markers)
-                            {
-                                var markerTransform = marker.GetGLModelViewMatrix();
-                                //var markerPosition = new Vector3((float)markerTransform[12], (float)markerTransform[13], (float)markerTransform[14]);
-                                var markerPosition = new DenseVector(new[] { markerTransform[14], markerTransform[12] });
-                                marker0.MarkerUpdate(kalman, markerPosition);
-                                transform.Position = new Vector2((float)kalman.Mean[0], (float)kalman.Mean[1]);
-                                transform.Rotation = (float)kalman.Mean[2];
-                                KalmanVisualization(kalman, covarianceTransform);
-                                markerText.Clear();
-                                markerText.Append(markerPosition.ToString());
-                                //System.Diagnostics.Trace.WriteLine(markerPosition);
-                            }
-                        }),
+                        //markerStream.Subscribe(markers =>
+                        //{
+                        //    foreach (var marker in markers)
+                        //    {
+                        //        var markerTransform = marker.GetGLModelViewMatrix();
+                        //        //var markerPosition = new Vector3((float)markerTransform[12], (float)markerTransform[13], (float)markerTransform[14]);
+                        //        var markerPosition = new DenseVector(new[] { markerTransform[14], markerTransform[12] });
+                        //        marker0.MarkerUpdate(kalman, markerPosition);
+                        //        transform.Position = new Vector2((float)kalman.Mean[0], (float)kalman.Mean[1]);
+                        //        transform.Rotation = (float)kalman.Mean[2];
+                        //        KalmanVisualization(kalman, covarianceTransform);
+                        //        markerText.Clear();
+                        //        markerText.Append(markerPosition.ToString());
+                        //        //System.Diagnostics.Trace.WriteLine(markerPosition);
+                        //    }
+                        //}),
                         differentialSteering.CommandChecksum.Subscribe(m => bumpers.GetBumperState()),
                         bumpers.BumpersMeasure.Subscribe(m =>
                         {
