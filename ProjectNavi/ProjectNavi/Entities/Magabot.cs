@@ -81,8 +81,8 @@ namespace ProjectNavi.Entities
                     }
                     let behavior = scheduler.TaskUpdate
                                             .Do(time => odometry.UpdateOdometryCommand())
-                                            .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-20, -20)))
-                                            .Do(time => magabotState.Leds.SetLedBoardState(255, 0, 0))
+                                            .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0, 0)))
+                                            .Do(time => magabotState.Leds.SetLedBoardState(255, 255, 255))
                                             .Do(time => skype.Show())
                                             .Do(time => skype.Magabot = magabotState)
                                             .Take(1)
