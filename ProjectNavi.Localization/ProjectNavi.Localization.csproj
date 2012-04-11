@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EkfSlam.cs" />
     <Compile Include="GraphSlam.cs" />
     <Compile Include="KalmanFilter.cs" />
     <Compile Include="MarkerLocalization.cs" />
