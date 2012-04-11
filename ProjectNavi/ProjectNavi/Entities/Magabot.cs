@@ -25,19 +25,14 @@ namespace ProjectNavi.Entities
     {
         public static IDisposable Create(Game game, SpriteRenderer renderer, SpriteRenderer backRenderer, TaskScheduler scheduler, ICommunicationManager communication, ReactiveWorkflow vision)
         {
-            //var connections = vision.Connections.ToArray();
+            var connections = vision.Connections.ToArray();
             //var kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();
-            //var markerStream = Expression.Lambda<Func<IObservable<IEnumerable<Marker>>>>(connections[0]).Compile()();
+            var markerStream = Expression.Lambda<Func<IObservable<IEnumerable<Marker>>>>(connections[0]).Compile()();
 
             return (from magabot in Enumerable.Range(0, 1)
                     let wheelClicks = 3900
                     let wheelDistance = 0.345f
                     let wheelRadius = 0.0467f
-                   /* let marker0 = new MarkerLocalization
-                    {
-                        MarkerPosition = new DenseVector(new[] { .0, .0 }),
-                        SensorOffset = new DenseVector(new[] { .1, .0 }),
-                    }
                     let slam = new SlamController()
                     let slamVisualizer = new SlamVisualizer(game, backRenderer, slam)
                     let markerText = new StringBuilder()
@@ -56,7 +51,7 @@ namespace ProjectNavi.Entities
                     let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius,wheelClicks)
                     let odometry = new OdometryBoard(communication, wheelClicks, wheelRadius, wheelDistance)
                     let magabotState = new MagabotState(leds, differentialSteering)
-                    let skype = new MainWindow()
+                    //let skype = new MainWindow()
                     let kalman = new KalmanFilter
                     {
                         Mean = new DenseVector(3),
@@ -70,8 +65,8 @@ namespace ProjectNavi.Entities
                                             .Do(time => odometry.UpdateOdometryCommand())
                                             .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0, 0)))
                                             .Do(time => magabotState.Leds.SetLedBoardState(255, 255, 255))
-                                            .Do(time => skype.Show())
-                                            .Do(time => skype.Magabot = magabotState)
+                                            //.Do(time => skype.Show())
+                                            //.Do(time => skype.Magabot = magabotState)
                                             .Take(1)
                     select new CompositeDisposable(
                         bumpers,
