@@ -16,28 +16,13 @@ using Bonsai;
 using System.Linq.Expressions;
 using ProjectNavi.Bonsai.Kinect;
 using Aruco.Net;
+using MathNet.Numerics.LinearAlgebra.Generic;
 
 namespace ProjectNavi.Entities
 {
     public class Magabot
     {
-        public static void KalmanVisualization(KalmanFilter kalman, Transform2D transform)
-        {
-            var eigendecomposition = kalman.Covariance.Take(new[] { 0, 1 }).Evd();
-            var eigenvalues = eigendecomposition.EigenValues();
-            var eigenvectors = eigendecomposition.EigenVectors();
-
-            // Transform of a unit circle
-            var translation = new Vector2((float)kalman.Mean[0], (float)kalman.Mean[1]);
-            var rotation = (float)Math.Atan2(eigenvectors[1, 0], eigenvectors[0, 0]);
-            var scale = new Vector2((float)eigenvalues[0].Magnitude, (float)eigenvalues[1].Magnitude);
-
-            transform.Position = translation;
-            transform.Rotation = rotation;
-            transform.Scale = scale;
-        }
-
-        public static IDisposable Create(Game game, SpriteRenderer renderer, TaskScheduler scheduler, ICommunicationManager communication, ReactiveWorkflow vision)
+        public static IDisposable Create(Game game, SpriteRenderer renderer, SpriteRenderer backRenderer, TaskScheduler scheduler, ICommunicationManager communication, ReactiveWorkflow vision)
         {
             var connections = vision.Connections.ToArray();
             //var kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();
@@ -52,9 +37,11 @@ namespace ProjectNavi.Entities
                         MarkerPosition = new DenseVector(new[] { .0, .0 }),
                         SensorOffset = new DenseVector(new[] { .1, .0 }),
                     }
+                    let slam = new SlamController()
+                    let slamVisualizer = new SlamVisualizer(game, backRenderer, slam)
                     let markerText = new StringBuilder()
                     let text = new StringBuilder()
-                    let transform = new Transform2D()
+                    let transform = slam.AgentTransform
                     let covarianceTransform = new Transform2D()
                     let font = game.Content.Load<SpriteFont>("DebugFont")
                     let texture = game.Content.Load<Texture2D>("magabot_cm")
@@ -75,6 +62,7 @@ namespace ProjectNavi.Entities
                             { 0, 1, 0 },
                             { 0, 0, 1 } })
                     }
+                    let visualizerLoop = scheduler.TaskUpdate.Do(time => slamVisualizer.Update())
                     let behavior = scheduler.TaskUpdate
                                             .Do(time => odometry.UpdateOdometryCommand())
                                             .Do(time => differentialSteering.UpdateWheelVelocity(new WheelVelocity(-3, -3)))
@@ -88,28 +76,14 @@ namespace ProjectNavi.Entities
                         sonars,
                         odometry,
                         differentialSteering,
+                        visualizerLoop.Subscribe(),
                         //kinectStream.Subscribe(),
-                        renderer.SubscribeTexture(covarianceTransform, covarianceTexture),
+                        //renderer.SubscribeTexture(covarianceTransform, covarianceTexture),
                         renderer.SubscribeTexture(transform, texture),
                         //renderer.SubscribeText(transform, font, () => text.ToString()),
                         renderer.SubscribeText(new Transform2D(-Vector2.One, 0, Vector2.One), font, () => markerText.ToString()),
                         behavior.Subscribe(),
-                        markerStream.Subscribe(markers =>
-                        {
-                            foreach (var marker in markers)
-                            {
-                                var markerTransform = marker.GetGLModelViewMatrix();
-                                //var markerPosition = new Vector3((float)markerTransform[12], (float)markerTransform[13], (float)markerTransform[14]);
-                                var markerPosition = new DenseVector(new[] { markerTransform[14], markerTransform[12] });
-                                marker0.MarkerUpdate(kalman, markerPosition);
-                                transform.Position = new Vector2((float)kalman.Mean[0], (float)kalman.Mean[1]);
-                                transform.Rotation = (float)kalman.Mean[2];
-                                KalmanVisualization(kalman, covarianceTransform);
-                                markerText.Clear();
-                                markerText.Append(markerPosition.ToString());
-                                //System.Diagnostics.Trace.WriteLine(markerPosition);
-                            }
-                        }),
+                        markerStream.Subscribe(markers => slam.UpdateMeasurements(markers)),
                         differentialSteering.CommandChecksum.Subscribe(m => bumpers.GetBumperState()),
                         bumpers.BumpersMeasure.Subscribe(m =>
                             {
@@ -138,15 +112,8 @@ namespace ProjectNavi.Entities
                         leds.LedBoardMeasure.Subscribe(m => odometry.UpdateOdometryCommand()),
                         odometry.Odometry.Subscribe(m =>
                         {
-                            if (m.LinearDisplacement != 0 && m.AngularDisplacement != 0)
-                            {
-                                OdometryLocalization.OdometerPredict(kalman, m.LinearDisplacement, m.AngularDisplacement);
-                                transform.Position = new Vector2((float)kalman.Mean[0], (float)kalman.Mean[1]);
-                                transform.Rotation = (float)kalman.Mean[2];
-                                KalmanVisualization(kalman, covarianceTransform);
-
-                                //System.Diagnostics.Trace.WriteLine("l: " + m.LinearDisplacement + " a: " + m.AngularDisplacement);
-                            }
+                            slam.UpdateMotion(m.LinearDisplacement, m.AngularDisplacement);
+                            slam.UpdateEstimate();
                             differentialSteering.Actuate();
                         })))
                     .First();
