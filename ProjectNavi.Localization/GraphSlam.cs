@@ -101,17 +101,4 @@ namespace ProjectNavi.Localization
             Xi = xiPrime;
         }
     }
-
-    public class LandmarkMeasurement
-    {
-        public LandmarkMeasurement(int index, Vector<double> measurement)
-        {
-            Index = index;
-            Measurement = measurement;
-        }
-
-        public int Index { get; private set; }
-
-        public Vector<double> Measurement { get; private set; }
-    }
 }

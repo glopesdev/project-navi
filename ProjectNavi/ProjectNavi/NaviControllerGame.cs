@@ -30,10 +30,14 @@ namespace ProjectNavi
     /// </summary>
     public class NaviControllerGame : Microsoft.Xna.Framework.Game
     {
+        float zoom = 1;
+        const float ZoomFactor = 0.01f;
+
         ReactiveWorkflow vision;
         IDisposable visionLoaded;
         GraphicsDeviceManager graphics;
         SpriteRenderer renderer;
+        SpriteRenderer backRenderer;
         TaskScheduler scheduler;
         ICommunicationManager communication;
 
@@ -41,9 +45,11 @@ namespace ProjectNavi
         {
             graphics = new GraphicsDeviceManager(this);
             renderer = new SpriteRenderer(this);
-            renderer.PixelsPerWorldUnit = 100; //100 pixels/meter
+            backRenderer = new SpriteRenderer(this);
+            renderer.PixelsPerWorldUnit = backRenderer.PixelsPerWorldUnit = 100; //100 pixels/meter
             scheduler = new TaskScheduler(this);
             Components.Add(scheduler);
+            Components.Add(backRenderer);
             Components.Add(renderer);
             Content.RootDirectory = "Content";
         }
@@ -87,7 +93,7 @@ namespace ProjectNavi
 
             // TODO: use this.Content to load your game content here
             Grid.Create(this, renderer);
-            Magabot.Create(this, renderer, scheduler, communication, vision);
+            Magabot.Create(this, renderer, backRenderer, scheduler, communication, vision);
         }
 
         /// <summary>
@@ -111,6 +117,9 @@ namespace ProjectNavi
                 this.Exit();
 
             // TODO: Add your update logic here
+            var keyboard = Keyboard.GetState();
+            if (keyboard.IsKeyDown(Keys.Q)) zoom += ZoomFactor;
+            if (keyboard.IsKeyDown(Keys.A)) zoom -= ZoomFactor;
 
             base.Update(gameTime);
         }
@@ -124,6 +133,7 @@ namespace ProjectNavi
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+            renderer.ViewMatrix = backRenderer.ViewMatrix = Matrix.CreateScale(zoom);
 
             base.Draw(gameTime);
         }
