@@ -74,22 +74,13 @@ namespace ProjectNavi
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
-            //using (var reader = XmlReader.Create("Vision.bonsai"))
-            //{
-            //    var serializer = new XmlSerializer(typeof(WorkflowBuilder));
-            //    var workflowBuilder = (WorkflowBuilder)serializer.Deserialize(reader);
-            //    vision = workflowBuilder.Workflow.Build();
-            
-                //visionLoaded = vision.Load();
-
-            //    var connections = vision.Connections.ToArray();
-            //    var kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();
-
-            //    kinectStream.Subscribe(frame =>
-            //    {
-            //        Console.WriteLine(frame);
-            //    });
-            //}
+            using (var reader = XmlReader.Create("Vision.bonsai"))
+            {
+                var serializer = new XmlSerializer(typeof(WorkflowBuilder));
+                var workflowBuilder = (WorkflowBuilder)serializer.Deserialize(reader);
+                vision = workflowBuilder.Workflow.Build();
+                visionLoaded = vision.Load();
+            }
 
             // TODO: use this.Content to load your game content here
             Grid.Create(this, renderer);
