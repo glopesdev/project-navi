@@ -27,7 +27,18 @@ namespace ProjectNavi.Localization
             return result;
         }
 
-        public static Matrix<T> Take<T>(this Matrix<T> matrix, int[] indices) where T : struct, IEquatable<T>, IFormattable
+        public static Vector<T> Take<T>(this Vector<T> vector, params int[] indices) where T : struct, IEquatable<T>, IFormattable
+        {
+            var result = vector.CreateVector(indices.Length);
+            for (int i = 0; i < indices.Length; i++)
+            {
+                result[i] = vector[indices[i]];
+            }
+
+            return result;
+        }
+
+        public static Matrix<T> Take<T>(this Matrix<T> matrix, params int[] indices) where T : struct, IEquatable<T>, IFormattable
         {
             return Take(matrix, indices, indices);
         }
