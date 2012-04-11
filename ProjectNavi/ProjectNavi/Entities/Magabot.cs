@@ -18,6 +18,8 @@ using ProjectNavi.Bonsai.Kinect;
 using Aruco.Net;
 using MathNet.Numerics.LinearAlgebra.Generic;
 using ProjectNavi.SkypeController;
+using ProjectNavi.Bonsai.Aruco;
+using ProjectNavi.Graphics;
 
 namespace ProjectNavi.Entities
 {
@@ -26,8 +28,8 @@ namespace ProjectNavi.Entities
         public static IDisposable Create(Game game, SpriteRenderer renderer, SpriteRenderer backRenderer, TaskScheduler scheduler, ICommunicationManager communication, ReactiveWorkflow vision)
         {
             var connections = vision.Connections.ToArray();
-            //var kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();
-            var markerStream = Expression.Lambda<Func<IObservable<IEnumerable<Marker>>>>(connections[0]).Compile()();
+            var kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();
+            var markerStream = Expression.Lambda<Func<IObservable<MarkerFrame>>>(connections[1]).Compile()();
 
             return (from magabot in Enumerable.Range(0, 1)
                     let wheelClicks = 3900
@@ -42,6 +44,7 @@ namespace ProjectNavi.Entities
                     let font = game.Content.Load<SpriteFont>("DebugFont")
                     let texture = game.Content.Load<Texture2D>("magabot_cm")
                     let bumperTexture = game.Content.Load<Texture2D>("square")
+                    let kinectTexture = new IplImageTexture(game.GraphicsDevice, 640, 480)
                     let covarianceTexture = TextureFactory.CreateCircleTexture(game.GraphicsDevice, 10, Color.White)
                     let bumpers = new BumperBoard(communication)
                     let battery = new BatteryBoard(communication)
@@ -60,7 +63,9 @@ namespace ProjectNavi.Entities
                             { 0, 1, 0 },
                             { 0, 0, 1 } })
                     }
-                    let visualizerLoop = scheduler.TaskUpdate.Do(time => slamVisualizer.Update())
+                    let visualizerLoop = scheduler.TaskUpdate
+                                            .Do(time => slamVisualizer.Update())
+                                            .Do(time => kinectTexture.Update())
                     let behavior = scheduler.TaskUpdate
                                             .Do(time => odometry.UpdateOdometryCommand())
                                             .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0, 0)))
@@ -79,11 +84,15 @@ namespace ProjectNavi.Entities
                         visualizerLoop.Subscribe(),
                         //kinectStream.Subscribe(),
                         //renderer.SubscribeTexture(covarianceTransform, covarianceTexture),
+                        backRenderer.SubscribeTexture(new Transform2D(), kinectTexture.Texture),
                         renderer.SubscribeTexture(transform, texture),
                         //renderer.SubscribeText(transform, font, () => text.ToString()),
                         renderer.SubscribeText(new Transform2D(-Vector2.One, 0, Vector2.One), font, () => markerText.ToString()),
                         behavior.Subscribe(),
-                        markerStream.Subscribe(markers => slam.UpdateMeasurements(markers)),
+                        kinectStream.Subscribe(kinectFrame => kinectTexture.SetData(kinectFrame.ColorImage)),
+                        markerStream.Subscribe(markerFrame => slam.UpdateMeasurements(markerFrame)),
+                        differentialSteering.CommandChecksum.Subscribe(m => bumpers.GetBumperState()),
+                        bumpers.BumpersMeasure.Subscribe(m => battery.GetBatteryState()),
                         battery.BatteryMeasure.Subscribe(m =>
                         {
                             magabotState.Battery = m;

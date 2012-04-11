@@ -20,11 +20,17 @@
           <string>ColorImage</string>
         </Selector>
       </Expression>
+      <Expression xsi:type="NullSink" />
     </Nodes>
     <Edges>
       <Edge>
         <From>1</From>
         <To>2</To>
+        <Label>Source</Label>
+      </Edge>
+      <Edge>
+        <From>1</From>
+        <To>3</To>
         <Label>Source</Label>
       </Edge>
       <Edge>

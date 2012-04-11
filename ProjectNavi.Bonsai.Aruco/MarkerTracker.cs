@@ -10,7 +10,7 @@ using System.Xml.Serialization;
 
 namespace ProjectNavi.Bonsai.Aruco
 {
-    public class MarkerTracker : Projection<IplImage, IEnumerable<Marker>>
+    public class MarkerTracker : Projection<IplImage, MarkerFrame>
     {
         CvMat cameraMatrix;
         CvMat distortion;
@@ -46,7 +46,7 @@ namespace ProjectNavi.Bonsai.Aruco
 
         public float MarkerSize { get; set; }
 
-        public override IEnumerable<Marker> Process(IplImage input)
+        public override MarkerFrame Process(IplImage input)
         {
             var hInput = input.DangerousGetHandle();
             var hCamMatrix = cameraMatrix != null ? cameraMatrix.DangerousGetHandle() : IntPtr.Zero;
@@ -56,7 +56,8 @@ namespace ProjectNavi.Bonsai.Aruco
             detector.Param2 = Param2;
             detector.CornerRefinement = CornerRefinement;
 
-            return detector.Detect(hInput, hCamMatrix, hDistortion, MarkerSize);
+            var detectedMarkers = detector.Detect(hInput, hCamMatrix, hDistortion, MarkerSize);
+            return new MarkerFrame(parameters, detectedMarkers);
         }
 
         public override IDisposable Load()

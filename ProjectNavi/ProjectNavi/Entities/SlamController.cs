@@ -10,6 +10,7 @@ using Cyberiad.Graphics;
 using Aruco.Net;
 using MathNet.Numerics.LinearAlgebra.Generic;
 using Cyberiad;
+using ProjectNavi.Bonsai.Aruco;
 
 namespace ProjectNavi.Entities
 {
@@ -28,14 +29,14 @@ namespace ProjectNavi.Entities
             agentTransform = new Transform2D();
             slam.MotionNoise = new DenseMatrix(new[,]
             {
-                {0.1, 0, 0},
-                {0, 0.1, 0},
-                {0, 0, 0.2}
+                {0.01, 0, 0},
+                {0, 0.01, 0},
+                {0, 0, 0.02}
             });
             slam.MeasurementNoise = new DenseMatrix(new[,]
             {
-                {0.01, 0},
-                {0, 0.01}
+                {0.1, 0},
+                {0, 0.1}
             });
 
             landmarkIndices = new Dictionary<int, int>();
@@ -53,14 +54,15 @@ namespace ProjectNavi.Entities
             get { return agentTransform; }
         }
 
-        public void UpdateMeasurements(IEnumerable<Marker> markers)
+        public void UpdateMeasurements(MarkerFrame markerFrame)
         {
-            measurements = markers.Select(marker =>
+            measurements = markerFrame.DetectedMarkers.Select(marker =>
             {
                 var markerTransform = marker.GetGLModelViewMatrix();
-                var markerPosition = new DenseVector(new[] { markerTransform[14], markerTransform[12] });
+                var markerPosition = new DenseVector(new[] { -markerTransform[14], markerTransform[12] });
                 var bearing = Math.Atan2(markerPosition[1], markerPosition[0]);
                 var range = markerPosition.Norm(2);
+                System.Diagnostics.Trace.WriteLine(string.Format("mx: {0} my: {1} bearing:{2} range:{3}", markerPosition[0], markerPosition[1], bearing, range));
 
                 int landmarkIndex;
                 if (!landmarkIndices.TryGetValue(marker.Id, out landmarkIndex))
