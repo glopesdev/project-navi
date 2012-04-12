@@ -89,6 +89,8 @@ namespace ProjectNavi.SkypeController
         public void OnKinectFrame(KinectFrame kinectFrame)
         {
             //TODO: Kinect skeleton code here: kinectFrame.SkeletonData (...)
+
+            //kinectFrame.SkeletonData
         }
 
         private void CheckStatus(Object stateInfo)
@@ -115,18 +117,12 @@ namespace ProjectNavi.SkypeController
                             {
                                 _dispatcher.BeginInvoke((Action)(() =>
                                 {
-                                    int sameItemNumber = 0;
-                                    int i = 0;
-                                   
-
                                     if (!comboBoxSelectedUser.Items.Cast<string>().Contains(call.PartnerHandle)) // New user
                                     {
                                         comboBoxSelectedUser.Items.Add(call.PartnerHandle);
 
-                                        //if (checkBoxSendWelcomeMessage.IsChecked == true)
-                                        //{
-                                        //    msg.Chat.SendMessage(Properties.Settings.Default.welcomeMessage);
-                                        //}
+                                        if (checkBoxSendWelcomeMessage.IsChecked == true)
+                                            skype.SendMessage(call.PartnerHandle, Properties.Settings.Default.welcomeMessage);
                                     }
                                 
                                     comboBoxSelectedUser.SelectedItem = call.PartnerHandle.ToString();
@@ -140,11 +136,6 @@ namespace ProjectNavi.SkypeController
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        //buttonUncheckSelectedUser.IsEnabled = false;
-                        //comboBoxSelectedUser.SelectedIndex = -1;
                     }
                 }));
             }
@@ -231,24 +222,12 @@ namespace ProjectNavi.SkypeController
                     }
                     else
                     {
-                        int sameItemNumber = 0;
-                        int i = 0;
-                        while (i < comboBoxSelectedUser.Items.Count)
-                        {
-                            if (msg.Sender.Handle == comboBoxSelectedUser.Items.GetItemAt(i).ToString())
-                                sameItemNumber++;
-
-                            i++;
-                        }
-
                         if (!comboBoxSelectedUser.Items.Cast<string>().Contains(msg.Sender.Handle)) // New chat
                         {
                             comboBoxSelectedUser.Items.Add(msg.Sender.Handle);
 
                             if (checkBoxSendWelcomeMessage.IsChecked == true)
-                            {
                                 msg.Chat.SendMessage(Properties.Settings.Default.welcomeMessage);
-                            }
                         }
 
                         if (comboBoxSelectedUser.SelectedItem == null) // First chat
