@@ -51,10 +51,10 @@ namespace ProjectNavi.Entities
                     let ground = new GroundSensorBoard(communication)
                     let leds = new LedBoard(communication)
                     let sonars = new SonarsBoard(communication)
-                    let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius,wheelClicks)
+                    let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius, wheelClicks)
                     let odometry = new OdometryBoard(communication, wheelClicks, wheelRadius, wheelDistance)
                     let magabotState = new MagabotState(leds, differentialSteering)
-                    //let skype = new MainWindow()
+                    let skype = new MainWindow()
                     let kalman = new KalmanFilter
                     {
                         Mean = new DenseVector(3),
@@ -70,8 +70,8 @@ namespace ProjectNavi.Entities
                                             .Do(time => odometry.UpdateOdometryCommand())
                                             .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0, 0)))
                                             .Do(time => magabotState.Leds.SetLedBoardState(255, 255, 255))
-                                            //.Do(time => skype.Show())
-                                            //.Do(time => skype.Magabot = magabotState)
+                        //.Do(time => skype.Show())
+                        //.Do(time => skype.Magabot = magabotState)
                                             .Take(1)
                     select new CompositeDisposable(
                         bumpers,
@@ -89,7 +89,11 @@ namespace ProjectNavi.Entities
                         //renderer.SubscribeText(transform, font, () => text.ToString()),
                         renderer.SubscribeText(new Transform2D(-Vector2.One, 0, Vector2.One), font, () => markerText.ToString()),
                         behavior.Subscribe(),
-                        kinectStream.Subscribe(kinectFrame => kinectTexture.SetData(kinectFrame.ColorImage)),
+                        kinectStream.Subscribe(kinectFrame =>
+                        {
+                            kinectTexture.SetData(kinectFrame.ColorImage);
+                            skype.OnKinectFrame(kinectFrame);
+                        }),
                         markerStream.Subscribe(markerFrame => slam.UpdateMeasurements(markerFrame)),
                         differentialSteering.CommandChecksum.Subscribe(m => bumpers.GetBumperState()),
                         bumpers.BumpersMeasure.Subscribe(m => battery.GetBatteryState()),
@@ -106,12 +110,12 @@ namespace ProjectNavi.Entities
                             magabotState.IRGroundMiddle = m.SensorMiddle;
                             magabotState.IRGroundRight = m.SensorRight;
                             text.AppendLine(string.Format("IR: {0} IR: {1} IR: {2}", m.SensorLeft, m.SensorMiddle, m.SensorRight));
-                                sonars.GetSonarsBoardState();
-                            }),
+                            sonars.GetSonarsBoardState();
+                        }),
                         sonars.SonarsBoardMeasure.Subscribe(m =>
                         {
 
-                            for(int count =0; count < magabotState.Sonar.Length; count++)
+                            for (int count = 0; count < magabotState.Sonar.Length; count++)
                             {
                                 //magabotState
                                 var sonar = m[count];
