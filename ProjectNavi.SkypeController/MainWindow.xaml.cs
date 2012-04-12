@@ -16,6 +16,7 @@ using System.Threading;
 using System.IO.Ports;
 using ProjectNavi.Hardware;
 using SKYPE4COMLib;
+using ProjectNavi.Bonsai.Kinect;
 
 namespace ProjectNavi.SkypeController
 {
@@ -83,6 +84,11 @@ namespace ProjectNavi.SkypeController
 
             SetDirection('p', "init");
             //Magabot.Leds.SetLedBoardState(0, 0, 255);
+        }
+
+        public void OnKinectFrame(KinectFrame kinectFrame)
+        {
+            //TODO: Kinect skeleton code here: kinectFrame.SkeletonData (...)
         }
 
         private void CheckStatus(Object stateInfo)
