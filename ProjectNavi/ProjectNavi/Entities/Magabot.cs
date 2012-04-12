@@ -68,10 +68,10 @@ namespace ProjectNavi.Entities
                                             .Do(time => kinectTexture.Update())
                     let behavior = scheduler.TaskUpdate
                                             .Do(time => odometry.UpdateOdometryCommand())
+                                            .Do(time => skype.Magabot = magabotState)
                                             .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0, 0)))
                                             .Do(time => magabotState.Leds.SetLedBoardState(255, 255, 255))
-                        //.Do(time => skype.Show())
-                        //.Do(time => skype.Magabot = magabotState)
+                                            .Do(time => skype.Show())
                                             .Take(1)
                     select new CompositeDisposable(
                         bumpers,
@@ -96,7 +96,12 @@ namespace ProjectNavi.Entities
                         }),
                         markerStream.Subscribe(markerFrame => slam.UpdateMeasurements(markerFrame)),
                         differentialSteering.CommandChecksum.Subscribe(m => bumpers.GetBumperState()),
-                        bumpers.BumpersMeasure.Subscribe(m => battery.GetBatteryState()),
+                        bumpers.BumpersMeasure.Subscribe(m => 
+                        {
+                            magabotState.BumperLeft = m.BumperLeft;
+                            magabotState.BumperRight = m.BumperRight;
+                            battery.GetBatteryState();
+                        }),
                         battery.BatteryMeasure.Subscribe(m =>
                         {
                             magabotState.Battery = m;
