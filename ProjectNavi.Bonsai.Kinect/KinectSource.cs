@@ -13,6 +13,7 @@ namespace ProjectNavi.Bonsai.Kinect
     public class KinectSource : Source<KinectFrame>
     {
         KinectSensor kinect;
+        short[] depthImageBuffer;
         byte[] colorImageBuffer;
 
         Thread captureThread;
@@ -40,9 +41,9 @@ namespace ProjectNavi.Bonsai.Kinect
         {
             stop = new ManualResetEventSlim();
             kinect = KinectSensor.KinectSensors.FirstOrDefault();
+            kinect.DepthStream.Enable(DepthImageFormat.Resolution320x240Fps30);
             kinect.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
             kinect.SkeletonStream.Enable();
-            //kinect.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(kinect_AllFramesReady);
             return base.Load();
         }
 
@@ -50,26 +51,51 @@ namespace ProjectNavi.Bonsai.Kinect
         {
             while (running)
             {
+                using (var depthFrame = kinect.DepthStream.OpenNextFrame(50))
                 using (var colorFrame = kinect.ColorStream.OpenNextFrame(50))
                 using (var skeletonFrame = kinect.SkeletonStream.OpenNextFrame(50))
                 {
-                    if (colorFrame != null && skeletonFrame != null)
+                    if (depthFrame != null && colorFrame != null && skeletonFrame != null)
                     {
-                        var bufferLength = colorFrame.Width * colorFrame.Height * colorFrame.BytesPerPixel;
-                        if (colorImageBuffer == null || colorImageBuffer.Length != bufferLength)
+                        // Keep depth as managed array
+                        var depthImageBuffer = new short[depthFrame.PixelDataLength];
+                        //if (depthImageBuffer == null || depthImageBuffer.Length != depthFrame.PixelDataLength)
+                        //{
+                        //    depthImageBuffer = new short[depthFrame.PixelDataLength];
+                        //}
+
+                        if (colorImageBuffer == null || colorImageBuffer.Length != colorFrame.PixelDataLength)
                         {
-                            colorImageBuffer = new byte[bufferLength];
+                            colorImageBuffer = new byte[colorFrame.PixelDataLength];
                         }
 
                         var skeletonData = new Skeleton[skeletonFrame.SkeletonArrayLength];
                         skeletonFrame.CopySkeletonDataTo(skeletonData);
                         colorFrame.CopyPixelDataTo(colorImageBuffer);
+                        depthFrame.CopyPixelDataTo(depthImageBuffer);
+
+                        // Flip color image to get proper measurements
                         var bufferHandle = GCHandle.Alloc(colorImageBuffer, GCHandleType.Pinned);
-                        var image = new IplImage(new CvSize(colorFrame.Width, colorFrame.Height), colorFrame.BytesPerPixel * 8 / 4, 4, bufferHandle.AddrOfPinnedObject());
-                        var output = new IplImage(image.Size, image.Depth, 3);
-                        ImgProc.cvCvtColor(image, output, ColorConversion.BGRA2BGR);
+                        var colorImage = new IplImage(new CvSize(colorFrame.Width, colorFrame.Height), colorFrame.BytesPerPixel * 8 / 4, 4, bufferHandle.AddrOfPinnedObject());
+                        var colorOutput = new IplImage(colorImage.Size, colorImage.Depth, 3);
+                        ImgProc.cvCvtColor(colorImage, colorOutput, ColorConversion.BGRA2BGR);
+                        Core.cvFlip(colorOutput, colorOutput, FlipMode.Horizontal);
                         bufferHandle.Free();
-                        Subject.OnNext(new KinectFrame(kinect, output, skeletonData));
+
+                        //bufferHandle = GCHandle.Alloc(depthImageBuffer, GCHandleType.Pinned);
+                        //var depthImage = new IplImage(new CvSize(depthFrame.Width, depthFrame.Height), depthFrame.BytesPerPixel * 8, 1, bufferHandle.AddrOfPinnedObject());
+                        //var depthOutput = new IplImage(depthImage.Size, depthImage.Depth, 1);
+                        //Core.cvCopy(depthImage, depthOutput);
+                        //Core.cvFlip(depthOutput, depthOutput, FlipMode.Horizontal);
+                        //bufferHandle.Free();
+
+                        //**** Flip depth horizontally ****
+                        //bufferHandle = GCHandle.Alloc(depthImageBuffer, GCHandleType.Pinned);
+                        //var depthImage = new IplImage(new CvSize(depthFrame.Width, depthFrame.Height), depthFrame.BytesPerPixel * 8, 1, bufferHandle.AddrOfPinnedObject());
+                        //Core.cvFlip(depthImage, depthImage, FlipMode.Horizontal);
+                        //bufferHandle.Free();
+
+                        Subject.OnNext(new KinectFrame(kinect, depthImageBuffer, colorOutput, skeletonData));
                     }
                 }
             }
