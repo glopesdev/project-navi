@@ -32,16 +32,7 @@
             </Border>
 
             <Canvas Margin="-1,0,-1,0" Grid.Row="1" Background="#01FFFFFF" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="MainCanvas">
-                <Expander Header="Controls" Height="170" Name="expanderControls" Width="160" Focusable="False" IsExpanded="True" HorizontalAlignment="Right" Foreground="#FF4E4E4E" IsEnabled="True" >
-                    <Grid>
-                        <Button Background="White" Focusable="False" Height="40" IsHitTestVisible="True" IsManipulationEnabled="False" IsTabStop="True" Name="buttonStop" Width="40" Click="buttonStop_Click" Margin="58,53,60,54" />
-                        <Button Background="White" Focusable="False" Height="40" IsHitTestVisible="True" IsManipulationEnabled="False" IsTabStop="True" Name="buttonLeft" Width="40" Click="buttonLeft_Click" Margin="12,53,106,54" />
-                        <Button Background="White" Focusable="False" Height="40" IsHitTestVisible="True" IsManipulationEnabled="False" IsTabStop="True" Name="buttonRight" Width="40" Click="buttonRight_Click" Margin="104,53,14,54" />
-                        <Button Background="White" Focusable="False" Height="40" IsHitTestVisible="True" IsManipulationEnabled="False" IsTabStop="True" Name="buttonBackward" Width="40" Click="buttonBackward_Click" Margin="58,99,60,8" />
-                        <Button Background="White" Focusable="False" Height="40" IsHitTestVisible="True" IsManipulationEnabled="False" IsTabStop="True" Name="buttonForward" Width="40" Click="buttonForward_Click" Margin="58,7,60,100" />
-                    </Grid>
-                </Expander>
-                <Expander Focusable="False" Header="Details" Height="170" IsExpanded="False" Name="expanderDetails" Width="160" Foreground="#FF4E4E4E">
+                <Expander Focusable="False" Header="Details" Height="170" IsExpanded="False" Name="expanderDetails" Width="160" Foreground="#FF4E4E4E" Visibility="Hidden">
                     <Grid>
                         <Label Content="Sendind orders to:" Height="32" HorizontalAlignment="Left" Margin="4,15,0,0" Name="labelSendingOrdersTo" VerticalAlignment="Top" Width="154" Foreground="#FF4E4E4E" />
                         <Label Content="No user selected" FontSize="18" FontWeight="Normal" Height="42" HorizontalAlignment="Left" Margin="4,32,0,0" Name="labelSelectedUser" VerticalAlignment="Top" Width="154" Foreground="#FF4E4E4E" />
@@ -49,8 +40,25 @@
                         <Label Content="Last order sent:" Height="32" HorizontalAlignment="Left" Margin="4,73,0,0" Name="labelLastOrderSent" VerticalAlignment="Top" Width="154" Foreground="#FF4E4E4E" />
                     </Grid>
                 </Expander>
+                <Expander Header="Controls" Height="216" Name="expanderControls" Width="160" Focusable="False" IsExpanded="True" HorizontalAlignment="Right" Foreground="#FF4E4E4E" IsEnabled="True" >
+                    <Grid>
+                        <Button Background="White" Focusable="False" Height="40" IsHitTestVisible="True" IsManipulationEnabled="False" IsTabStop="True" Name="buttonStop" Width="40" Click="buttonStop_Click" Margin="58,57,60,96" />
+                        <Button Background="White" Focusable="False" Height="40" IsHitTestVisible="True" IsManipulationEnabled="False" IsTabStop="True" Name="buttonLeft" Width="40" Click="buttonLeft_Click" Margin="12,57,106,96" />
+                        <Button Background="White" Focusable="False" Height="40" IsHitTestVisible="True" IsManipulationEnabled="False" IsTabStop="True" Name="buttonRight" Width="40" Click="buttonRight_Click" Margin="104,57,14,96" />
+                        <Button Background="White" Focusable="False" Height="40" IsHitTestVisible="True" IsManipulationEnabled="False" IsTabStop="True" Name="buttonBackward" Width="40" Click="buttonBackward_Click" Margin="58,103,60,50" />
+                        <Button Background="White" Focusable="False" Height="40" IsHitTestVisible="True" IsManipulationEnabled="False" IsTabStop="True" Name="buttonForward" Width="40" Click="buttonForward_Click" Margin="58,11,60,142" />
+                        <Button Background="White" Focusable="False" Height="40" IsHitTestVisible="True" IsManipulationEnabled="False" IsTabStop="True" Name="buttonFollowPerson" Margin="32,153,32,0" Content="Follow Person" FontFamily="Segoe UI" Foreground="#FF707070" Click="buttonFollowPerson_Click" />
+                    </Grid>
+                </Expander>
                 <Image Height="50" Name="imageBumpAlert" Stretch="Fill" Width="200" Source="/ProjectNavi.RemoteGui;component/Images/bumpAlert.png" />
                 <Image Height="50" Name="imageHoleAlert" Source="/ProjectNavi.RemoteGui;component/Images/holeAlert.png" Stretch="Fill" Width="200" />
+                <Button Name="personButton0"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="OrangeRed" Click="personButton0_Click" />
+                <Button Name="personButton1"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="DodgerBlue" Click="personButton1_Click" />
+                <Button Name="personButton2"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="Gold" Click="personButton2_Click" />
+                <Button Name="personButton3"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="ForestGreen" Click="personButton3_Click" />
+                <Button Name="personButton4"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="Firebrick" Click="personButton4_Click" />
+                <Button Name="personButton5"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="BlueViolet" Click="personButton5_Click" />
+
             </Canvas>
 
             <Canvas Margin="-1,0,-1,0" Grid.Row="2" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="BottomCanvas">

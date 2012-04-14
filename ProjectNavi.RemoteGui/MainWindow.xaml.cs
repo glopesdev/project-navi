@@ -43,6 +43,10 @@ namespace ProjectNavi.RemoteGui
         int bumpTime;
         int holeTime;
 
+        Button[] personButton = new Button[6];
+
+        int selectedTrackingId;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -75,6 +79,19 @@ namespace ProjectNavi.RemoteGui
 
             bumpTime = 20;
             holeTime = 20;
+
+            personButton[0] = personButton0;
+            personButton[1] = personButton1;
+            personButton[2] = personButton2;
+            personButton[3] = personButton3;
+            personButton[4] = personButton4;
+            personButton[5] = personButton5;
+
+            foreach (Button button in personButton)
+            {
+                button.Visibility = System.Windows.Visibility.Hidden;
+            }
+
         }
 
         private void CheckStatus(Object stateInfo)
@@ -101,7 +118,7 @@ namespace ProjectNavi.RemoteGui
                             {
                                 selectedSkypeChatUser = call.PartnerHandle.ToString();
 
-                                labelSelectedUser.Content = call.PartnerDisplayName.ToString();
+                                labelSelectedUser.Content = call.PartnerHandle.ToString();
                             }
                         }
                     }
@@ -152,6 +169,44 @@ namespace ProjectNavi.RemoteGui
                     else if (msg.Body == "h" || msg.Body == Properties.Settings.Default.holeMessage)
                     {
                         holeTime = 0;
+                    }
+                    else if(msg.Body.Contains("People: "))
+                    {
+                        String[] skeletonData = new String[6];
+
+                        skeletonData[0] = msg.Body.Split(' ')[1];
+
+                        int i = 0;
+                        while (skeletonData[i].IndexOf(';') > 0)
+                        {
+                            //skeletonData[i+1] = skeletonData[i].Split(';')[1];
+                            //skeletonData[i] = skeletonData[i].Split(';')[0];
+                            skeletonData[i+1] = skeletonData[i].Substring(skeletonData[i].IndexOf(';')+1);
+                            skeletonData[i] = skeletonData[i].Substring(0,skeletonData[i].IndexOf(';'));
+
+                            i++;
+                        }
+
+                        for (int o = 0; o < 6; o++) 
+                        {
+                            if (skeletonData[o] != null && skeletonData[o].Contains('(') && skeletonData[o].Contains('|') && skeletonData[o].Contains(')'))
+                            {
+
+                                personButton[o].Content = skeletonData[o].Substring(0, skeletonData[o].IndexOf('('));
+                                personButton[o].Visibility = System.Windows.Visibility.Visible;
+
+                                String cordinates = skeletonData[o].Substring(skeletonData[o].IndexOf('('));
+
+                                double x = (float)Double.Parse(cordinates.Substring(1, cordinates.IndexOf('|') - 1));
+                                double y = (float)Double.Parse(cordinates.Substring(cordinates.IndexOf('|') + 1, cordinates.IndexOf(')') - cordinates.IndexOf('|') - 1));
+
+                                x = (MainCanvas.ActualWidth / 2) + (x * MainCanvas.ActualWidth) - (personButton[o].Width / 2);
+                                y = (MainCanvas.ActualHeight / 2) + (y * MainCanvas.ActualHeight);
+
+                                Canvas.SetLeft(personButton[o], x);
+                                Canvas.SetTop(personButton[o], y);
+                            }
+                        }
                     }
                 }
             }
@@ -432,6 +487,101 @@ namespace ProjectNavi.RemoteGui
             holeTime++;
         }
 
+
+        private void personButton0_Click(object sender, RoutedEventArgs e)
+        {
+            _dispatcher.BeginInvoke((Action)(() =>
+            {
+                skype.SendMessage(selectedSkypeChatUser, "Follow: " + personButton0.Content);
+
+                foreach (Button button in personButton)
+                {
+                    button.Visibility = System.Windows.Visibility.Hidden;
+                }
+            }));
+        }
+
+        private void personButton1_Click(object sender, RoutedEventArgs e)
+        {
+            _dispatcher.BeginInvoke((Action)(() =>
+            {
+                skype.SendMessage(selectedSkypeChatUser, "Follow: " + personButton1.Content);
+
+                foreach (Button button in personButton)
+                {
+                    button.Visibility = System.Windows.Visibility.Hidden;
+                }
+            }));
+        }
+
+        private void personButton2_Click(object sender, RoutedEventArgs e)
+        {
+            _dispatcher.BeginInvoke((Action)(() =>
+            {
+                skype.SendMessage(selectedSkypeChatUser, "Follow: " + personButton2.Content);
+
+                foreach (Button button in personButton)
+                {
+                    button.Visibility = System.Windows.Visibility.Hidden;
+                }
+            }));
+        }
+
+        private void personButton3_Click(object sender, RoutedEventArgs e)
+        {
+            _dispatcher.BeginInvoke((Action)(() =>
+            {
+                skype.SendMessage(selectedSkypeChatUser, "Follow: " + personButton3.Content);
+
+                foreach (Button button in personButton)
+                {
+                    button.Visibility = System.Windows.Visibility.Hidden;
+                }
+            }));
+        }
+
+        private void personButton4_Click(object sender, RoutedEventArgs e)
+        {
+            _dispatcher.BeginInvoke((Action)(() =>
+            {
+                skype.SendMessage(selectedSkypeChatUser, "Follow: " + personButton4.Content);
+
+                foreach (Button button in personButton)
+                {
+                    button.Visibility = System.Windows.Visibility.Hidden;
+                }
+            }));
+        }
+
+        private void personButton5_Click(object sender, RoutedEventArgs e)
+        {
+            _dispatcher.BeginInvoke((Action)(() =>
+            {
+                skype.SendMessage(selectedSkypeChatUser, "Follow: " + personButton5.Content);
+
+                foreach (Button button in personButton)
+                {
+                    button.Visibility = System.Windows.Visibility.Hidden;
+                }
+            }));
+        }
+
+        private void buttonFollowPerson_Click(object sender, RoutedEventArgs e)
+        {
+            _dispatcher.BeginInvoke((Action)(() =>
+            {
+                if (selectedSkypeChatUser != "" && selectedSkypeChatUser != null)
+                {
+                    skype.SendMessage(selectedSkypeChatUser, "What people are there?");
+                }
+                else
+                {
+                    labelOrderValue.Content = "No user selected";
+                }
+            }));
+        }
     }
+
+
 
 }
