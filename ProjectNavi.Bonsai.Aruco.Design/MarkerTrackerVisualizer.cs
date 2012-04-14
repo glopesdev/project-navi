@@ -26,10 +26,10 @@ namespace ProjectNavi.Bonsai.Aruco.Design
         {
             if (input != null)
             {
-                var markers = (IEnumerable<Marker>)value;
+                var markerFrame = (MarkerFrame)value;
                 var image = new IplImage(input.Size, 8, 3);
                 Core.cvCopy(input, image);
-                foreach (var marker in markers)
+                foreach (var marker in markerFrame.DetectedMarkers)
                 {
                     marker.Draw(image.DangerousGetHandle(), 0, 0, 255, 2, true);
                     if (tracker != null && tracker.Parameters != null)
