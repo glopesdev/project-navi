@@ -11,6 +11,7 @@ using Aruco.Net;
 using MathNet.Numerics.LinearAlgebra.Generic;
 using Cyberiad;
 using ProjectNavi.Bonsai.Aruco;
+using ProjectNavi.Navigation;
 
 namespace ProjectNavi.Entities
 {
@@ -18,15 +19,14 @@ namespace ProjectNavi.Entities
     {
         EkfSlam slam;
         Dictionary<int, int> landmarkIndices;
-        Transform2D agentTransform;
+        Vehicle vehicle;
 
         Vector<double> motion;
         IEnumerable<LandmarkMeasurement> measurements;
 
-        public SlamController()
+        public SlamController(Vehicle agent)
         {
             slam = new EkfSlam();
-            agentTransform = new Transform2D();
             slam.MotionNoise = new DenseMatrix(new[,]
             {
                 {0.01, 0, 0},
@@ -42,16 +42,12 @@ namespace ProjectNavi.Entities
             landmarkIndices = new Dictionary<int, int>();
             motion = new DenseVector(2);
             measurements = Enumerable.Empty<LandmarkMeasurement>();
+            vehicle = agent;
         }
 
         public EkfSlam SlamEstimator
         {
             get { return slam; }
-        }
-
-        public Transform2D AgentTransform
-        {
-            get { return agentTransform; }
         }
 
         public void UpdateMeasurements(MarkerFrame markerFrame)
@@ -62,7 +58,7 @@ namespace ProjectNavi.Entities
                 var markerPosition = new DenseVector(new[] { -markerTransform[14], markerTransform[12] });
                 var bearing = Math.Atan2(markerPosition[1], markerPosition[0]);
                 var range = markerPosition.Norm(2);
-                System.Diagnostics.Trace.WriteLine(string.Format("mx: {0} my: {1} bearing:{2} range:{3}", markerPosition[0], markerPosition[1], bearing, range));
+                //System.Diagnostics.Trace.WriteLine(string.Format("mx: {0} my: {1} bearing:{2} range:{3}", markerPosition[0], markerPosition[1], bearing, range));
 
                 int landmarkIndex;
                 if (!landmarkIndices.TryGetValue(marker.Id, out landmarkIndex))
@@ -78,6 +74,7 @@ namespace ProjectNavi.Entities
         public void UpdateMotion(double dx, double dtheta)
         {
             motion = new DenseVector(new[] { dx, dtheta });
+            vehicle.Velocity = new Vector2((float)dx, (float)dtheta);
         }
 
         public void UpdateEstimate()
@@ -86,8 +83,8 @@ namespace ProjectNavi.Entities
 
             // Wrap angle
             slam.Mean[2] = MathHelper.WrapAngle((float)slam.Mean[2]);
-            agentTransform.Position = new Vector2((float)slam.Mean[0], (float)slam.Mean[1]);
-            agentTransform.Rotation = (float)slam.Mean[2];
+            vehicle.Transform.Position = new Vector2((float)slam.Mean[0], (float)slam.Mean[1]);
+            vehicle.Transform.Rotation = (float)slam.Mean[2];
         }
     }
 }

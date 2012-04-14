@@ -22,6 +22,7 @@ using Microsoft.Kinect;
 using ProjectNavi.Bonsai.Kinect;
 using Aruco.Net;
 using ProjectNavi.SkypeController;
+using ProjectNavi.Graphics;
 
 namespace ProjectNavi
 {
@@ -35,9 +36,11 @@ namespace ProjectNavi
 
         ReactiveWorkflow vision;
         IDisposable visionLoaded;
+        IDisposable magabot;
         GraphicsDeviceManager graphics;
         SpriteRenderer renderer;
         SpriteRenderer backRenderer;
+        PrimitiveBatchRenderer primitiveRenderer;
         TaskScheduler scheduler;
         ICommunicationManager communication;
 
@@ -46,11 +49,13 @@ namespace ProjectNavi
             graphics = new GraphicsDeviceManager(this);
             renderer = new SpriteRenderer(this);
             backRenderer = new SpriteRenderer(this);
+            primitiveRenderer = new PrimitiveBatchRenderer(this);
             renderer.PixelsPerWorldUnit = backRenderer.PixelsPerWorldUnit = 100; //100 pixels/meter
             scheduler = new TaskScheduler(this);
             Components.Add(scheduler);
             Components.Add(backRenderer);
             Components.Add(renderer);
+            Components.Add(primitiveRenderer);
             Content.RootDirectory = "Content";
         }
 
@@ -73,6 +78,8 @@ namespace ProjectNavi
         /// </summary>
         protected override void LoadContent()
         {
+            primitiveRenderer.Projection = Matrix.CreateOrthographic(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 1);
+
             // Create a new SpriteBatch, which can be used to draw textures.
             using (var reader = XmlReader.Create("Vision.bonsai"))
             {
@@ -83,8 +90,8 @@ namespace ProjectNavi
             }
 
             // TODO: use this.Content to load your game content here
-            Grid.Create(this, renderer);
-            Magabot.Create(this, renderer, backRenderer, scheduler, communication, vision);
+            //Grid.Create(this, renderer);
+            magabot = Magabot.Create(this, renderer, backRenderer, primitiveRenderer, scheduler, communication, vision);
         }
 
         /// <summary>
@@ -94,6 +101,8 @@ namespace ProjectNavi
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
+            magabot.Dispose();
+            visionLoaded.Dispose();
         }
 
         /// <summary>
@@ -125,6 +134,7 @@ namespace ProjectNavi
 
             // TODO: Add your drawing code here
             renderer.ViewMatrix = backRenderer.ViewMatrix = Matrix.CreateScale(zoom);
+            primitiveRenderer.View = Matrix.CreateScale(zoom);
 
             base.Draw(gameTime);
         }
