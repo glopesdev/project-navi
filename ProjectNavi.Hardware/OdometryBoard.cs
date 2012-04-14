@@ -51,8 +51,8 @@ namespace ProjectNavi.Hardware
 
            // Trace.WriteLine(leftClicks + " " + rightClicks);
 
-            var distanceLeft = -leftClicks * TwoPi * wheelRadius / wheelClicks;
-            var distanceRight = rightClicks * TwoPi * wheelRadius / wheelClicks;
+            var distanceLeft = leftClicks * TwoPi * wheelRadius / wheelClicks;
+            var distanceRight = -rightClicks * TwoPi * wheelRadius / wheelClicks;
 
             var linearDisplacement = (distanceLeft + distanceRight) / 2;
             var angularDisplacement = (distanceRight - distanceLeft) / wheelDistance;
