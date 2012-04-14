@@ -57,6 +57,7 @@ namespace ProjectNavi
             Components.Add(renderer);
             Components.Add(primitiveRenderer);
             Content.RootDirectory = "Content";
+            TargetElapsedTime = TimeSpan.FromSeconds(1 / 30.0);
         }
 
         /// <summary>
@@ -68,7 +69,7 @@ namespace ProjectNavi
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            communication = new CommunicationManagerSerial("COM7", 9600);
+            communication = new CommunicationManagerSerial("COM30", 9600);
             base.Initialize();
         }
 

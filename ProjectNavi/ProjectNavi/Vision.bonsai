@@ -20,7 +20,8 @@
           <string>ColorImage</string>
         </Selector>
       </Expression>
-      <Expression xsi:type="NullSink" />
+      <Expression xsi:type="q2:ThreadPool" />
+      <Expression xsi:type="q2:ThreadPool" />
     </Nodes>
     <Edges>
       <Edge>
@@ -30,11 +31,16 @@
       </Edge>
       <Edge>
         <From>1</From>
-        <To>3</To>
+        <To>4</To>
         <Label>Source</Label>
       </Edge>
       <Edge>
         <From>2</From>
+        <To>3</To>
+        <Label>Source</Label>
+      </Edge>
+      <Edge>
+        <From>3</From>
         <To>0</To>
         <Label>Source</Label>
       </Edge>
@@ -43,5 +49,6 @@
   <ExtensionTypes>
     <Type>ProjectNavi.Bonsai.Aruco.MarkerTracker, ProjectNavi.Bonsai.Aruco, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Type>
     <Type>ProjectNavi.Bonsai.Kinect.KinectSource, ProjectNavi.Bonsai.Kinect, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Type>
+    <Type>ProjectNavi.Bonsai.Kinect.ThreadPool, ProjectNavi.Bonsai.Kinect, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Type>
   </ExtensionTypes>
 </WorkflowBuilder>

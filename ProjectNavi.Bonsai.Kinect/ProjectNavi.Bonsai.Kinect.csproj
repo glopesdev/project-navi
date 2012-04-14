@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="KinectFrame.cs" />
     <Compile Include="KinectSource.cs" />
+    <Compile Include="ThreadPool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
