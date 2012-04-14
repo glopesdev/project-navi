@@ -60,12 +60,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SonarsBoard.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Externals\Cyberiad\Cyberiad\Cyberiad.csproj">
-      <Project>{7147D9B4-1A21-4208-9664-EA9C3984364F}</Project>
-      <Name>Cyberiad</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
