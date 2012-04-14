@@ -39,7 +39,6 @@ namespace ProjectNavi.SkypeController
         //public SerialPort serialPort;
         public MagabotState Magabot {get; set;}
 
-        int maxIRValue;
         
         int bumpMsgTime;
         int holeMsgTime;
@@ -50,6 +49,7 @@ namespace ProjectNavi.SkypeController
         String lastDirectionSetter;
 
         int selectedTrackingId;
+        bool reportSkeletons;
 
         Button[] personButton = new Button[6];
 
@@ -86,7 +86,7 @@ namespace ProjectNavi.SkypeController
 
             bumpMsgTime = 1000;
             holeMsgTime = 1000;
-            //backUpTime = 1000;
+            
             Magabot.Stop();
             Magabot.Navigation = MagabotState.NavigationMode.Assisted;
             Magabot.SafetyBump.Subscribe(m =>
@@ -106,19 +106,18 @@ namespace ProjectNavi.SkypeController
                 else
                     Magabot.Leds.SetLedBoardState(0, 0, 255);
             });
+
+            reportSkeletons = false;
         }
 
         public void OnKinectFrame(KinectFrame kinectFrame)
         {
             //TODO: Kinect skeleton code here: kinectFrame.SkeletonData (...)
 
-            //foreach (Skeleton skeleton in kinectFrame.SkeletonData)
-            //{
-
-            //}
             _dispatcher.BeginInvoke((Action)(() =>
             {
-
+                String skeletonsMsg = "People detected: ";
+                
                 foreach (Button button in personButton)
                 {
                     button.Content = "";
@@ -146,6 +145,8 @@ namespace ProjectNavi.SkypeController
 
                                 Canvas.SetLeft(personButton[i], scaledJoint.Position.X - (personButton[i].Width / 2));
                                 Canvas.SetTop(personButton[i], scaledJoint.Position.Y);
+
+                                skeletonsMsg += String.Format("{0} at (x:{1},y:{2}); ", skeleton.TrackingId, joint.Position.X, joint.Position.Y);
                             }
                         }
 
@@ -163,6 +164,16 @@ namespace ProjectNavi.SkypeController
                                 SetDirection('a', "Skeleton");
                         }
                     }
+                }
+
+                if (reportSkeletons )
+                {
+                    if (comboBoxSelectedUser.SelectedItem != null && checkBoxSendBumperMessage.IsChecked == true)
+                    {
+                        skype.SendMessage(comboBoxSelectedUser.SelectedItem.ToString(), skeletonsMsg);
+                    }
+
+                    reportSkeletons = false;
                 }
             }));
         }
@@ -295,6 +306,14 @@ namespace ProjectNavi.SkypeController
                         {
                             msg.Chat.SendMessage("No");
                         }
+                    }
+                    else if (msg.Body == "What people are there?")
+                    {
+                        reportSkeletons = true;
+                    }
+                    else if (msg.Body.Contains("Follow: "))
+                    {
+                        selectedTrackingId = (int)Int16.Parse(msg.Body.Split(new [] {':'})[1]);
                     }
                     else
                     {
@@ -488,6 +507,10 @@ namespace ProjectNavi.SkypeController
                 lastDirectionSetter = setter;
 
                 labelOrderValue.Content = msg;
+
+                if (setter != "Skeleton")
+                    selectedTrackingId = -1;
+
             }));
         }
 
