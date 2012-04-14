@@ -90,7 +90,16 @@
     <Compile Include="Entities\Magabot.cs" />
     <Compile Include="Entities\SlamController.cs" />
     <Compile Include="Entities\SlamVisualizer.cs" />
+    <Compile Include="Entities\SmartObject.cs" />
+    <Compile Include="Entities\TaskProvider.cs" />
     <Compile Include="Graphics\IplImageTexture.cs" />
+    <Compile Include="Graphics\KinectVisualizer.cs" />
+    <Compile Include="Graphics\PrimitiveBatchRenderer.cs" />
+    <Compile Include="Graphics\SonarVisualizer.cs" />
+    <Compile Include="Navigation\Locomotion.cs" />
+    <Compile Include="Navigation\Steering.cs" />
+    <Compile Include="Navigation\Vehicle.cs" />
+    <Compile Include="Graphics\PrimitiveBatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="NaviControllerGame.cs" />
