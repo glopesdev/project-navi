@@ -53,15 +53,15 @@ namespace ProjectNavi.Hardware
             this.sensorRight = sensorRight;
         }
 
-        public double SensorLeft
+        public short SensorLeft
         {
             get { return sensorLeft; }
         }
-        public double SensorMiddle
+        public short SensorMiddle
         {
             get { return sensorMiddle; }
         }
-        public double SensorRight
+        public short SensorRight
         {
             get { return sensorRight; }
         }

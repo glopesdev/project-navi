@@ -69,8 +69,8 @@ namespace ProjectNavi.Entities
                     let sonars = new SonarsBoard(communication)
                     let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius,wheelClicks)
                     let odometry = new OdometryBoard(communication, wheelClicks, wheelRadius, wheelDistance)
-                    let magabotState = new MagabotState(leds, differentialSteering)
-                    let skype = new MainWindow()
+                    let magabotState = new MagabotState(leds, differentialSteering,bumpers,battery,ground, sonars)
+                    let skype = new MainWindow(magabotState)
                     let kalman = new KalmanFilter
                     {
                         Mean = new DenseVector(3),
@@ -84,7 +84,6 @@ namespace ProjectNavi.Entities
                                             .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0, 0)))
                                             .Do(time => magabotState.Leds.SetLedBoardState(255, 255, 255))
                                             .Do(time => skype.Show())
-                                            .Do(time => skype.Magabot = magabotState)
                                             .Take(1)
                     select new CompositeDisposable(
                         bumpers,
@@ -119,33 +118,26 @@ namespace ProjectNavi.Entities
                         differentialSteering.CommandChecksum.Subscribe(m => bumpers.GetBumperState()),
                         bumpers.BumpersMeasure.Subscribe(m =>
                         {
-                            magabotState.BumperLeft = m.BumperLeft;
-                            magabotState.BumperRight = m.BumperRight;
                             battery.GetBatteryState();
                         }),
                         battery.BatteryMeasure.Subscribe(m =>
                         {
-                            magabotState.Battery = m;
                             text.Clear();
                             text.AppendLine(string.Format("Battery: {0}", m.ToString()));
                             ground.GetGroundSensorState();
                         }),
                         ground.GroundSensorsMeasure.Subscribe(m =>
                         {
-                            magabotState.IRGroundLeft = m.SensorLeft;
-                            magabotState.IRGroundMiddle = m.SensorMiddle;
-                            magabotState.IRGroundRight = m.SensorRight;
                             text.AppendLine(string.Format("IR: {0} IR: {1} IR: {2}", m.SensorLeft, m.SensorMiddle, m.SensorRight));
                                 sonars.GetSonarsBoardState();
                             }),
                         sonars.SonarsBoardMeasure.Subscribe(m =>
                         {
 
-                            for(int count =0; count < magabotState.Sonar.Length; count++)
+                            for(int count =0; count < m.Length; count++)
                             {
                                 //magabotState
                                 var sonar = m[count];
-                                magabotState.Sonar[count] = sonar;
                                 text.Append(string.Format("Sonar: {0} ", sonar));
                             }
                             text.AppendLine();
@@ -156,12 +148,11 @@ namespace ProjectNavi.Entities
                         {
                             if (m.LinearDisplacement != 0 && m.AngularDisplacement != 0)
                             {
-                            OdometryLocalization.OdometerPredict(kalman, m.LinearDisplacement, m.AngularDisplacement);
-                            transform.Position = new Vector2((float)kalman.Mean[0], (float)kalman.Mean[1]);
-                            transform.Rotation = (float)kalman.Mean[2];
-                            KalmanVisualization(kalman, covarianceTransform);
-                            magabotState.Transform = transform ;
-
+                                OdometryLocalization.OdometerPredict(kalman, m.LinearDisplacement, m.AngularDisplacement);
+                                transform.Position = new Vector2((float)kalman.Mean[0], (float)kalman.Mean[1]);
+                                transform.Rotation = (float)kalman.Mean[2];
+                                KalmanVisualization(kalman, covarianceTransform);
+                           
                                 //System.Diagnostics.Trace.WriteLine("l: " + m.LinearDisplacement + " a: " + m.AngularDisplacement);
                             }
                             differentialSteering.Actuate();
