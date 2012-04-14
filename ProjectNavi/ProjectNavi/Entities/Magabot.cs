@@ -82,7 +82,7 @@ namespace ProjectNavi.Entities
                         odometry,
                         differentialSteering,
                         visualizerLoop.Subscribe(),
-                        //kinectStream.Subscribe(),
+                        kinectStream.Subscribe(),
                         //renderer.SubscribeTexture(covarianceTransform, covarianceTexture),
                         backRenderer.SubscribeTexture(new Transform2D(), kinectTexture.Texture),
                         renderer.SubscribeTexture(transform, texture),

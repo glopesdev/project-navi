@@ -1,8 +1,8 @@
 ﻿<Window x:Class="ProjectNavi.SkypeController.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="skypeRobotController" UseLayoutRounding="False" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="592.5" d:DesignWidth="700" MinWidth="720" MinHeight="150" SizeToContent="Height" Width="700" Height="320" Name="skypeRobotController">
-    <Canvas Name="MainCanvas" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="700" Height="280">
+        Title="skypeRobotController" UseLayoutRounding="False" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="592.5" d:DesignWidth="700" MinWidth="720" MinHeight="150" Width="720" Height="546.776" Name="skypeRobotController" xmlns:my="clr-namespace:Microsoft.Samples.Kinect.WpfViewers;assembly=Microsoft.Samples.Kinect.WpfViewers">
+    <Canvas Name="MainCanvas1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="700" Height="Auto">
         <Expander Canvas.Left="365" Canvas.Top="12" Focusable="False" FontSize="16" Header="Chat" Height="230.046" IsExpanded="True" Name="expanderChat" Width="323" >
             <Grid Height="207.5">
                 <Grid.ColumnDefinitions>
@@ -25,12 +25,21 @@
                 </Expander>
             </Grid>
         </Expander>
-        <Expander Focusable="False" Header="Details" Height="231.78" IsExpanded="True" Name="expanderDetails" Width="208.75" Foreground="#FF4E4E4E" Canvas.Left="12" Canvas.Top="12" FontSize="16">
+        <Expander Focusable="False" Header="Details" Height="231.78" IsExpanded="True" Name="expanderDetails" Width="208.75" Foreground="#FF4E4E4E" Canvas.Left="365" Canvas.Top="258.22" FontSize="16">
             <Grid>
                 <Label Content="No order was sent" FontSize="18" FontWeight="Normal" Height="42" HorizontalAlignment="Left" Margin="4,35.322,0,0" Name="labelOrderValue" VerticalAlignment="Top" Width="154" Foreground="#FF4E4E4E" />
                 <Label Content="Last order sent:" Height="32" HorizontalAlignment="Left" Margin="4,16.322,0,0" Name="labelLastOrderSent" VerticalAlignment="Top" Width="154" Foreground="#FF4E4E4E" />
             </Grid>
         </Expander>
+        <Canvas Canvas.Left="12" Canvas.Top="10" Height="240" Width="320" Background="#FFC7C7C7">
+
+            <Button Name="personButton0"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="OrangeRed" Click="personButton0_Click" />
+            <Button Name="personButton1"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="DodgerBlue" Click="personButton1_Click" />
+            <Button Name="personButton2"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="Gold" Click="personButton2_Click" />
+            <Button Name="personButton3"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="ForestGreen" Click="personButton3_Click" />
+            <Button Name="personButton4"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="Firebrick" Click="personButton4_Click" />
+            <Button Name="personButton5"  Canvas.Left="0" Canvas.Top="0" Height="25" Width="50" Foreground="Blue" Background="BlueViolet" Click="personButton5_Click" />
+        </Canvas>
     </Canvas>
 </Window>
 

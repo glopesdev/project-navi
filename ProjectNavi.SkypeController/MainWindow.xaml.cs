@@ -17,6 +17,9 @@ using System.IO.Ports;
 using ProjectNavi.Hardware;
 using SKYPE4COMLib;
 using ProjectNavi.Bonsai.Kinect;
+using Coding4Fun.Kinect.Wpf;
+using Microsoft.Kinect;
+
 
 namespace ProjectNavi.SkypeController
 {
@@ -40,8 +43,15 @@ namespace ProjectNavi.SkypeController
         
         int bumpMsgTime;
         int holeMsgTime;
+        //int backUpTime;
         bool safetyBump, safetyGround;
 
+        char lastDirectionSet;
+        String lastDirectionSetter;
+
+        int selectedTrackingId;
+
+        Button[] personButton = new Button[6];
 
         public MainWindow(MagabotState Magabot)
         {
@@ -67,10 +77,16 @@ namespace ProjectNavi.SkypeController
 
             Properties.Settings.Default.Reload();
 
+            personButton[0] = personButton0;
+            personButton[1] = personButton1;
+            personButton[2] = personButton2;
+            personButton[3] = personButton3;
+            personButton[4] = personButton4;
+            personButton[5] = personButton5;
 
             bumpMsgTime = 1000;
             holeMsgTime = 1000;
-
+            //backUpTime = 1000;
             Magabot.Stop();
             Magabot.Navigation = MagabotState.NavigationMode.Assisted;
             Magabot.SafetyBump.Subscribe(m =>
@@ -96,7 +112,59 @@ namespace ProjectNavi.SkypeController
         {
             //TODO: Kinect skeleton code here: kinectFrame.SkeletonData (...)
 
-            //kinectFrame.SkeletonData
+            //foreach (Skeleton skeleton in kinectFrame.SkeletonData)
+            //{
+
+            //}
+            _dispatcher.BeginInvoke((Action)(() =>
+            {
+
+                foreach (Button button in personButton)
+                {
+                    button.Content = "";
+                    button.Visibility = System.Windows.Visibility.Hidden;
+                }
+
+                for (int i = 0; i < 6; i++)
+                {
+                    Skeleton skeleton = kinectFrame.SkeletonData.ElementAt(i);
+
+                    if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
+                    {
+                        foreach (Joint joint in skeleton.Joints)
+                        {
+                            if (joint.JointType == JointType.Head)
+                            {
+                                personButton[i].Content = skeleton.TrackingId;
+                                personButton[i].Visibility = System.Windows.Visibility.Visible;
+
+                                //convert the value to X/Y
+                                //Joint scaledJoint = joint.ScaleTo(320, 240);
+
+                                //convert & scale (.3 = means 1/3 of joint distance)
+                                Joint scaledJoint = joint.ScaleTo(320, 240, .3f, .3f);
+
+                                Canvas.SetLeft(personButton[i], scaledJoint.Position.X - (personButton[i].Width / 2));
+                                Canvas.SetTop(personButton[i], scaledJoint.Position.Y);
+                            }
+                        }
+
+                        if (skeleton.TrackingId == selectedTrackingId)
+                        {
+                            if (skeleton.Position.Z < 1)
+                                SetDirection('s', "Skeleton");
+                            else if (skeleton.Position.Z > 1.5)
+                                SetDirection('w', "Skeleton");
+                            else if (skeleton.Position.X < -.2f)
+                                SetDirection('d', "Skeleton");
+                            else if (skeleton.Position.X > -.2f && skeleton.Position.X < .2f)
+                                SetDirection('p', "Skeleton");
+                            else if (skeleton.Position.X > .2f)
+                                SetDirection('a', "Skeleton");
+                        }
+                    }
+                }
+            }));
         }
 
         private void CheckStatus(Object stateInfo)
@@ -158,7 +226,7 @@ namespace ProjectNavi.SkypeController
         {
             bumpMsgTime++;
             holeMsgTime++;
-            backUpTime++;
+            //backUpTime++;
 
             if (Magabot.BumperSensorState.BumperLeft || Magabot.BumperSensorState.BumperRight)
             {
@@ -197,11 +265,12 @@ namespace ProjectNavi.SkypeController
                 }
             }
 
-            if (backUpTime == 10)
-            {
-                SetDirection('p', "Safety");
-                Magabot.Leds.SetLedBoardState(0, 0, 255);
-            }
+            //if (backUpTime == 10)
+            //{
+            //    SetDirection('p', "Safety");
+            //    Magabot.Leds.SetLedBoardState(0, 0, 255);
+            //}
+            
         }
 
         public void skype_MessageStatus(ChatMessage msg, TChatMessageStatus Status)
@@ -246,7 +315,6 @@ namespace ProjectNavi.SkypeController
                             if (checkBoxSendWelcomeMessage.IsChecked == true)
                             {
                                 msg.Chat.SendMessage(Properties.Settings.Default.welcomeMessage);
-                        }
                             }
                         }
 
@@ -257,17 +325,17 @@ namespace ProjectNavi.SkypeController
                         {
                             switch (msg.Body)
                             {
-                                case "w": Magabot.Forward();
+                                case "w": SetDirection('w', "Message");
                                     break;
-                                case "s": Magabot.Backward();
+                                case "s": SetDirection('s', "Message");
                                     break;
-                                case "a": Magabot.Left();
+                                case "a": SetDirection('a', "Message");
                                     break;
-                                case "d": Magabot.Right();
+                                case "d": SetDirection('d', "Message");
                                     break;
-                                case "p": Magabot.Stop();
+                                case "p": SetDirection('p', "Message");
                                     break;
-                                default: Magabot.Stop();
+                                default: SetDirection('p', "Message");
                                     break;
                             }
                         }
@@ -329,45 +397,99 @@ namespace ProjectNavi.SkypeController
             comboBoxSelectedUser.SelectedIndex = -1;
         }
 
-        //public void SetDirection(char direction, String setter)
-        //{
-        //    _dispatcher.BeginInvoke((Action)(() =>
-        //    {
-        //        String msg = "";
+        private void personButton1_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                selectedTrackingId = (int)personButton1.Content;
+            }
+            catch { }
+        }
 
-        //        switch(direction)
-        //        {
-        //            case 'a':
-        //                msg = "a - left";
-        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(spinVelocity, -spinVelocity));
-        //                break;
-        //            case 'd':
-        //                msg = "d - right";
-        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-spinVelocity,spinVelocity));
-        //                break;
-        //            case 'w':
-        //                msg = "w - up";
-        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(mainVelocity,mainVelocity));
-        //                break;
-        //            case 's':
-        //                msg = "s - down";
-        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-mainVelocity,-mainVelocity));
-        //                break;
-        //            case 'p':   
-        //                msg = "p - stop";
-        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0,0));
-        //                break;
-        //            default :
-        //                msg = "p - stop";
-        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0,0));
-        //                break;
-        //        }
-        //        lastDirectionSet = direction;
-        //        lastDirectionSetter = setter;
+        private void personButton2_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                selectedTrackingId = (int)personButton2.Content;
+            }
+            catch { }
+        }
 
-        //        labelOrderValue.Content = msg;
-        //    }));
-        //}
+        private void personButton3_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                selectedTrackingId = (int)personButton3.Content;
+            }
+            catch { }
+        }
+
+        private void personButton4_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                selectedTrackingId = (int)personButton4.Content;
+            }
+            catch { }
+        }
+
+        private void personButton5_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                selectedTrackingId = (int)personButton5.Content;
+            }
+            catch { }
+        }
+
+        private void personButton0_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                selectedTrackingId = (int)personButton0.Content;
+            }
+            catch { }
+        }
+
+        public void SetDirection(char direction, String setter)
+        {
+            _dispatcher.BeginInvoke((Action)(() =>
+            {
+                String msg = "";
+
+                switch (direction)
+                {
+                    case 'a':
+                        msg = "a - left";
+                        Magabot.Left();
+                        break;
+                    case 'd':
+                        msg = "d - right";
+                        Magabot.Right();
+                        break;
+                    case 'w':
+                        msg = "w - up";
+                        Magabot.Forward();
+                        break;
+                    case 's':
+                        msg = "s - down";
+                        Magabot.Backward();
+                        break;
+                    case 'p':
+                        msg = "p - stop";
+                        Magabot.Stop();
+                        break;
+                    default:
+                        msg = "p - stop";
+                        Magabot.Stop();
+                        break;
+                }
+                lastDirectionSet = direction;
+                lastDirectionSetter = setter;
+
+                labelOrderValue.Content = msg;
+            }));
+        }
 
     }
 }
