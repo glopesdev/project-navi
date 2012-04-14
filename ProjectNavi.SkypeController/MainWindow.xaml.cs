@@ -32,26 +32,20 @@ namespace ProjectNavi.SkypeController
         System.Windows.Threading.DispatcherTimer frameTimer;
         int skypeChats = 0;
         int skypeCalls = 0;
-        int callID;
 
         //public SerialPort serialPort;
         public MagabotState Magabot {get; set;}
 
-        double mainVelocity;
-        double spinVelocity;
         int maxIRValue;
-
-        bool isAssistedNavigation = false;
         
         int bumpMsgTime;
         int holeMsgTime;
-        int backUpTime;
+        bool safetyBump, safetyGround;
 
-        char lastDirectionSet;
-        String lastDirectionSetter;
 
-        public MainWindow()
+        public MainWindow(MagabotState Magabot)
         {
+            this.Magabot = Magabot;
             InitializeComponent();
 
             _dispatcher = this.Dispatcher;
@@ -73,17 +67,29 @@ namespace ProjectNavi.SkypeController
 
             Properties.Settings.Default.Reload();
 
-            mainVelocity = 8;
-            spinVelocity = 5;
 
             bumpMsgTime = 1000;
             holeMsgTime = 1000;
-            backUpTime = 1000;
 
-            maxIRValue = 600;
-
-            SetDirection('p', "init");
-            //Magabot.Leds.SetLedBoardState(0, 0, 255);
+            Magabot.Stop();
+            Magabot.Navigation = MagabotState.NavigationMode.Assisted;
+            Magabot.SafetyBump.Subscribe(m =>
+            {
+                safetyBump = m;
+                Magabot.Leds.SetLedBoardState(255, 0, 0);
+                if (m)
+                    Magabot.Leds.SetLedBoardState(255, 0, 0);
+                else
+                    Magabot.Leds.SetLedBoardState(0, 0, 255);
+            });
+            Magabot.SafetyGround.Subscribe(m =>
+            {
+                safetyGround = m;
+                if (m)
+                    Magabot.Leds.SetLedBoardState(255, 0, 0);
+                else
+                    Magabot.Leds.SetLedBoardState(0, 0, 255);
+            });
         }
 
         public void OnKinectFrame(KinectFrame kinectFrame)
@@ -101,6 +107,7 @@ namespace ProjectNavi.SkypeController
             }
             catch (InvalidCastException e)
             {
+
             }
 
             try
@@ -120,9 +127,6 @@ namespace ProjectNavi.SkypeController
                                     if (!comboBoxSelectedUser.Items.Cast<string>().Contains(call.PartnerHandle)) // New user
                                     {
                                         comboBoxSelectedUser.Items.Add(call.PartnerHandle);
-
-                                        if (checkBoxSendWelcomeMessage.IsChecked == true)
-                                            skype.SendMessage(call.PartnerHandle, Properties.Settings.Default.welcomeMessage);
                                     }
                                 
                                     comboBoxSelectedUser.SelectedItem = call.PartnerHandle.ToString();
@@ -136,6 +140,11 @@ namespace ProjectNavi.SkypeController
                                 }
                             }
                         }
+                    }
+                    else
+                    {
+                        //buttonUncheckSelectedUser.IsEnabled = false;
+                        //comboBoxSelectedUser.SelectedIndex = -1;
                     }
                 }));
             }
@@ -151,11 +160,10 @@ namespace ProjectNavi.SkypeController
             holeMsgTime++;
             backUpTime++;
 
-            if (Magabot.BumperLeft || Magabot.BumperRight)
+            if (Magabot.BumperSensorState.BumperLeft || Magabot.BumperSensorState.BumperRight)
             {
-                SetDirection('s', "Safety");
-                Magabot.Leds.SetLedBoardState(255, 0, 0);
-                backUpTime = 0;
+                //SetDirection('s', "Safety");
+                
 
                 if (bumpMsgTime > 25)
                 {
@@ -170,11 +178,10 @@ namespace ProjectNavi.SkypeController
                     bumpMsgTime = 0;
                 }
             }
-            if (Magabot.IRGroundLeft > maxIRValue || Magabot.IRGroundMiddle > maxIRValue || Magabot.IRGroundRight > maxIRValue)
+            if (safetyGround)
             {
-                SetDirection('s', "Safety");
-                Magabot.Leds.SetLedBoardState(255, 0, 0);
-                backUpTime = 0;
+                //SetDirection('s', "Safety");
+               // Magabot.Leds.SetLedBoardState(255, 0, 0);
 
                 if (holeMsgTime > 50)
                 {
@@ -222,12 +229,25 @@ namespace ProjectNavi.SkypeController
                     }
                     else
                     {
+                        int sameItemNumber = 0;
+                        int i = 0;
+                        while (i < comboBoxSelectedUser.Items.Count)
+                        {
+                            if (msg.Sender.Handle == comboBoxSelectedUser.Items.GetItemAt(i).ToString())
+                                sameItemNumber++;
+
+                            i++;
+                        }
+
                         if (!comboBoxSelectedUser.Items.Cast<string>().Contains(msg.Sender.Handle)) // New chat
                         {
                             comboBoxSelectedUser.Items.Add(msg.Sender.Handle);
 
                             if (checkBoxSendWelcomeMessage.IsChecked == true)
+                            {
                                 msg.Chat.SendMessage(Properties.Settings.Default.welcomeMessage);
+                        }
+                            }
                         }
 
                         if (comboBoxSelectedUser.SelectedItem == null) // First chat
@@ -237,17 +257,17 @@ namespace ProjectNavi.SkypeController
                         {
                             switch (msg.Body)
                             {
-                                case "w": SetDirection('w', "User");
+                                case "w": Magabot.Forward();
                                     break;
-                                case "s": SetDirection('s', "User");
+                                case "s": Magabot.Backward();
                                     break;
-                                case "a": SetDirection('a', "User");
+                                case "a": Magabot.Left();
                                     break;
-                                case "d": SetDirection('d', "User");
+                                case "d": Magabot.Right();
                                     break;
-                                case "p": SetDirection('p', "User");
+                                case "p": Magabot.Stop();
                                     break;
-                                default: SetDirection('p', "User");
+                                default: Magabot.Stop();
                                     break;
                             }
                         }
@@ -309,49 +329,45 @@ namespace ProjectNavi.SkypeController
             comboBoxSelectedUser.SelectedIndex = -1;
         }
 
-        public void SetDirection(char direction, String setter)
-        {
-            _dispatcher.BeginInvoke((Action)(() =>
-            {
-                String msg = "";
+        //public void SetDirection(char direction, String setter)
+        //{
+        //    _dispatcher.BeginInvoke((Action)(() =>
+        //    {
+        //        String msg = "";
 
-                //if(direction != lastDirectionSet)
-                //{
-                switch(direction)
-                {
-                    case 'a':
-                        msg = "a - left";
-                        Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(spinVelocity, -spinVelocity));
-                        break;
-                    case 'd':
-                        msg = "d - right";
-                        Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-spinVelocity,spinVelocity));
-                        break;
-                    case 'w':
-                        msg = "w - up";
-                        Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(mainVelocity,mainVelocity));
-                        break;
-                    case 's':
-                        msg = "s - down";
-                        Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-mainVelocity,-mainVelocity));
-                        break;
-                    case 'p':   
-                        msg = "p - stop";
-                        Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0,0));
-                        break;
-                    default :
-                        msg = "p - stop";
-                        Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0,0));
-                        break;
-                }
-                //}
+        //        switch(direction)
+        //        {
+        //            case 'a':
+        //                msg = "a - left";
+        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(spinVelocity, -spinVelocity));
+        //                break;
+        //            case 'd':
+        //                msg = "d - right";
+        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-spinVelocity,spinVelocity));
+        //                break;
+        //            case 'w':
+        //                msg = "w - up";
+        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(mainVelocity,mainVelocity));
+        //                break;
+        //            case 's':
+        //                msg = "s - down";
+        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-mainVelocity,-mainVelocity));
+        //                break;
+        //            case 'p':   
+        //                msg = "p - stop";
+        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0,0));
+        //                break;
+        //            default :
+        //                msg = "p - stop";
+        //                Magabot.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0,0));
+        //                break;
+        //        }
+        //        lastDirectionSet = direction;
+        //        lastDirectionSetter = setter;
 
-                lastDirectionSet = direction;
-                lastDirectionSetter = setter;
-
-                labelOrderValue.Content = msg;
-            }));
-        }
+        //        labelOrderValue.Content = msg;
+        //    }));
+        //}
 
     }
 }
