@@ -116,7 +116,7 @@ namespace ProjectNavi.SkypeController
 
             _dispatcher.BeginInvoke((Action)(() =>
             {
-                String skeletonsMsg = "People detected: ";
+                String skeletonsMsg = "People: ";
                 
                 foreach (Button button in personButton)
                 {
@@ -146,7 +146,7 @@ namespace ProjectNavi.SkypeController
                                 Canvas.SetLeft(personButton[i], scaledJoint.Position.X - (personButton[i].Width / 2));
                                 Canvas.SetTop(personButton[i], scaledJoint.Position.Y);
 
-                                skeletonsMsg += String.Format("{0} at (x:{1},y:{2}); ", skeleton.TrackingId, joint.Position.X, joint.Position.Y);
+                                skeletonsMsg += String.Format("{0}({1}|{2});", skeleton.TrackingId, joint.Position.X, joint.Position.Y);
                             }
                         }
 
