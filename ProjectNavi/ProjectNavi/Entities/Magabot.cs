@@ -69,11 +69,15 @@ namespace ProjectNavi.Entities
                             { 0, 1, 0 },
                             { 0, 0, 1 } })
                     }
-                    let target = new Transform2D(new Vector2(2, 0), 0, Vector2.One)
+                    //let target = new Transform2D(new Vector2(1, 0), 0, Vector2.One)
+                    let target = new Transform2D()
+                    let targetTexture = TextureFactory.CreateCircleTexture(game.GraphicsDevice, 2, Color.Violet)
+                    let path = new[] { Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero }
                     let steeringBehavior = scheduler.TaskUpdate
-                                            .Do(Steering.Arrival(target, vehicle, 1, 3, 0.3f))
+                                            .Do(Steering.PathFollow(target, path, vehicle, 1f, 3, 0.05f))
+                                            //.Do(Steering.Arrival(target, vehicle, 1, 3, 0.3f))
                                             .Do(gameTime => steeringVisualizer.Steering = vehicle.Steering)
-                                            .Do(Locomotion.DifferentialSteering(vehicle, differentialSteering, wheelDistance, MathHelper.PiOver4, 10, 50, 50))
+                                            .Do(Locomotion.DifferentialSteering(vehicle, differentialSteering, wheelDistance, MathHelper.Pi / 25, 10, 15, 30))
                     let visualizerLoop = scheduler.TaskUpdate
                                             .Do(time => slamVisualizer.Update())
                                             .Do(time => kinectTexture.Update())
@@ -97,6 +101,7 @@ namespace ProjectNavi.Entities
                         kinectStream.Subscribe(),
                         backRenderer.SubscribeTexture(new Transform2D(new Vector2(-2.75f, 1.7f), 0, new Vector2(0.25f)), kinectTexture.Texture),
                         renderer.SubscribeTexture(transform, texture),
+                        renderer.SubscribeTexture(target, targetTexture),
                         //renderer.SubscribeText(transform, font, () => text.ToString()),
                         renderer.SubscribeText(new Transform2D(-Vector2.One, 0, Vector2.One), font, () => markerText.ToString()),
                         primitiveRenderer.SubscribePrimitive(transform, kinectVisualizer.DrawKinectDepthMap),

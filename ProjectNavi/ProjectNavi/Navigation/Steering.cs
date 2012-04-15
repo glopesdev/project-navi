@@ -24,12 +24,31 @@ namespace ProjectNavi.Navigation
             return gameTime =>
             {
                 var desiredVelocity = (target.Position - agent.Transform.Position);
-                //desiredVelocity += minSpeed * Vector2.Normalize(desiredVelocity);
-                desiredVelocity = desiredVelocity.Truncate(maxSpeed);
                 if (desiredVelocity.Length() > tolerance)
                 {
-                    //agent.Steering += CartesianToPolar(desiredVelocity - PolarToCartesian(agent.Velocity));
+                    desiredVelocity += minSpeed * Vector2.Normalize(desiredVelocity);
+                    desiredVelocity = desiredVelocity.Truncate(maxSpeed);
                     agent.Steering += desiredVelocity;
+                }
+            };
+        }
+
+        public static Action<GameTime> PathFollow(Transform2D target, IEnumerable<Vector2> path, Vehicle agent, float minSpeed, float maxSpeed, float tolerance)
+        {
+            bool waypoint = true;
+            var pathEnumerator = path.GetEnumerator();
+            var steering = Arrival(target, agent, minSpeed, maxSpeed, tolerance);
+            return gameTime =>
+            {
+                if (waypoint && pathEnumerator.MoveNext())
+                {
+                    target.Position = pathEnumerator.Current;
+                    waypoint = false;
+                }
+                else
+                {
+                    steering(gameTime);
+                    if (agent.Steering.Length() <= tolerance) waypoint = true;
                 }
             };
         }

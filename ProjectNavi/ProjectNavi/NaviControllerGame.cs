@@ -71,7 +71,7 @@ namespace ProjectNavi
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            communication = new CommunicationManagerSerial("COM30", 9600);
+            communication = new CommunicationManagerSerial("COM12", 9600);
             base.Initialize();
         }
 
