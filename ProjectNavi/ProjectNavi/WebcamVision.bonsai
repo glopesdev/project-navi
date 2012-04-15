@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WorkflowBuilder>
+  <Workflow xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:q3="clr-namespace:ProjectNavi.Bonsai.Kinect;assembly=ProjectNavi.Bonsai.Kinect" xmlns:q2="clr-namespace:Bonsai.Vision;assembly=Bonsai.Vision" xmlns:q1="clr-namespace:ProjectNavi.Bonsai.Aruco;assembly=ProjectNavi.Bonsai.Aruco" xmlns="https://horizongir.org/bonsai">
+    <Nodes>
+      <Expression xsi:type="Select">
+        <Projection xsi:type="q1:MarkerTracker">
+          <q1:CameraParameters>WebcamColor.yml</q1:CameraParameters>
+          <q1:ThresholdType>AdaptiveThreshold</q1:ThresholdType>
+          <q1:Param1>7</q1:Param1>
+          <q1:Param2>7</q1:Param2>
+          <q1:CornerRefinement>Harris</q1:CornerRefinement>
+          <q1:MarkerSize>0.12</q1:MarkerSize>
+        </Projection>
+      </Expression>
+      <Expression xsi:type="Source">
+        <Source xsi:type="q2:CameraCapture">
+          <q2:Index>0</q2:Index>
+        </Source>
+      </Expression>
+      <Expression xsi:type="q3:ThreadPool" />
+      <Expression xsi:type="q3:ThreadPool" />
+    </Nodes>
+    <Edges>
+      <Edge>
+        <From>0</From>
+        <To>2</To>
+        <Label>Source</Label>
+      </Edge>
+      <Edge>
+        <From>1</From>
+        <To>0</To>
+        <Label>Source</Label>
+      </Edge>
+      <Edge>
+        <From>1</From>
+        <To>3</To>
+        <Label>Source</Label>
+      </Edge>
+    </Edges>
+  </Workflow>
+  <ExtensionTypes>
+    <Type>ProjectNavi.Bonsai.Aruco.MarkerTracker, ProjectNavi.Bonsai.Aruco, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Type>
+    <Type>Bonsai.Vision.CameraCapture, Bonsai.Vision, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Type>
+    <Type>ProjectNavi.Bonsai.Kinect.ThreadPool, ProjectNavi.Bonsai.Kinect, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Type>
+  </ExtensionTypes>
+</WorkflowBuilder>

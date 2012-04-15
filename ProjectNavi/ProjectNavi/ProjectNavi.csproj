@@ -87,15 +87,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\Grid.cs" />
+    <Compile Include="Entities\KinectFreeSpace.cs" />
     <Compile Include="Entities\Magabot.cs" />
     <Compile Include="Entities\SlamController.cs" />
     <Compile Include="Entities\SlamVisualizer.cs" />
     <Compile Include="Entities\SmartObject.cs" />
     <Compile Include="Entities\TaskProvider.cs" />
+    <Compile Include="Graphics\FreeSpaceVisualizer.cs" />
     <Compile Include="Graphics\IplImageTexture.cs" />
     <Compile Include="Graphics\KinectVisualizer.cs" />
     <Compile Include="Graphics\PrimitiveBatchRenderer.cs" />
     <Compile Include="Graphics\SonarVisualizer.cs" />
+    <Compile Include="Graphics\SteeringVisualizer.cs" />
     <Compile Include="Navigation\Locomotion.cs" />
     <Compile Include="Navigation\Steering.cs" />
     <Compile Include="Navigation\Vehicle.cs" />
@@ -193,13 +196,22 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="WebcamColor.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="WebcamVision.bonsai.layout">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="WebcamVision.bonsai">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="KinectColor.yml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Vision.bonsai">
+    <None Include="KinectVision.bonsai">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Vision.bonsai.layout">
+    <None Include="KinectVision.bonsai.layout">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

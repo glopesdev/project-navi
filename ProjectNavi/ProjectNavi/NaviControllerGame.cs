@@ -23,6 +23,8 @@ using ProjectNavi.Bonsai.Kinect;
 using Aruco.Net;
 using ProjectNavi.SkypeController;
 using ProjectNavi.Graphics;
+using ProjectNavi.Bonsai.Aruco;
+using System.Reactive.Linq;
 
 namespace ProjectNavi
 {
@@ -81,18 +83,40 @@ namespace ProjectNavi
         {
             primitiveRenderer.Projection = Matrix.CreateOrthographic(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 1);
 
-            // Create a new SpriteBatch, which can be used to draw textures.
-            using (var reader = XmlReader.Create("Vision.bonsai"))
+            // Create the Bonsai vision workflow using a Kinect or a Webcam
+            var workflowName = Microsoft.Kinect.KinectSensor.KinectSensors.Count > 0 ? "KinectVision.bonsai" : "WebcamVision.bonsai";
+            using (var reader = XmlReader.Create(workflowName))
             {
                 var serializer = new XmlSerializer(typeof(WorkflowBuilder));
                 var workflowBuilder = (WorkflowBuilder)serializer.Deserialize(reader);
                 vision = workflowBuilder.Workflow.Build();
                 visionLoaded = vision.Load();
+
+                IObservable<IplImage> colorStream;
+                IObservable<KinectFrame> kinectStream;
+                IObservable<MarkerFrame> markerStream;
+                var connections = vision.Connections.ToArray();
+                if (connections.Length > 2)
+                {
+                    colorStream = Expression.Lambda<Func<IObservable<IplImage>>>(connections[1]).Compile()();
+                    kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();
+                    markerStream = Expression.Lambda<Func<IObservable<MarkerFrame>>>(connections[2]).Compile()();
+                }
+                else
+                {
+                    kinectStream = Observable.Never<KinectFrame>();
+                    colorStream = Expression.Lambda<Func<IObservable<IplImage>>>(connections[0]).Compile()();
+                    markerStream = Expression.Lambda<Func<IObservable<MarkerFrame>>>(connections[1]).Compile()();
+                }
+
+                Services.AddService(typeof(IObservable<IplImage>), colorStream);
+                Services.AddService(typeof(IObservable<KinectFrame>), kinectStream);
+                Services.AddService(typeof(IObservable<MarkerFrame>), markerStream);
             }
 
             // TODO: use this.Content to load your game content here
             //Grid.Create(this, renderer);
-            magabot = Magabot.Create(this, renderer, backRenderer, primitiveRenderer, scheduler, communication, vision);
+            magabot = Magabot.Create(this, renderer, backRenderer, primitiveRenderer, scheduler, communication);
         }
 
         /// <summary>
