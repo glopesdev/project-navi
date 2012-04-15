@@ -22,16 +22,17 @@ using ProjectNavi.Bonsai.Aruco;
 using ProjectNavi.Graphics;
 using ProjectNavi.Navigation;
 using System.Reactive.Concurrency;
+using OpenCV.Net;
 
 namespace ProjectNavi.Entities
 {
     public class Magabot
     {
-        public static IDisposable Create(Game game, SpriteRenderer renderer, SpriteRenderer backRenderer, PrimitiveBatchRenderer primitiveRenderer, TaskScheduler scheduler, ICommunicationManager communication, ReactiveWorkflow vision)
+        public static IDisposable Create(Game game, SpriteRenderer renderer, SpriteRenderer backRenderer, PrimitiveBatchRenderer primitiveRenderer, TaskScheduler scheduler, ICommunicationManager communication)
         {
-            var connections = vision.Connections.ToArray();
-            var kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();
-            var markerStream = Expression.Lambda<Func<IObservable<MarkerFrame>>>(connections[1]).Compile()();
+            var colorStream = game.Services.GetService<IObservable<IplImage>>();
+            var kinectStream = game.Services.GetService<IObservable<KinectFrame>>();
+            var markerStream = game.Services.GetService<IObservable<MarkerFrame>>();
 
             return (from magabot in Enumerable.Range(0, 1)
                     let wheelClicks = 3900
@@ -42,15 +43,15 @@ namespace ProjectNavi.Entities
                     let slamVisualizer = new SlamVisualizer(game, backRenderer, slam)
                     let kinectVisualizer = new KinectVisualizer(game)
                     let sonarVisualizer = new SonarVisualizer()
+                    let steeringVisualizer = new SteeringVisualizer()
+                    let freeSpaceVisualizer = new FreeSpaceVisualizer()
                     let markerText = new StringBuilder()
                     let text = new StringBuilder()
                     let transform = vehicle.Transform
-                    let covarianceTransform = new Transform2D()
                     let font = game.Content.Load<SpriteFont>("DebugFont")
                     let texture = game.Content.Load<Texture2D>("magabot_cm")
                     let bumperTexture = game.Content.Load<Texture2D>("square")
                     let kinectTexture = new IplImageTexture(game.GraphicsDevice, 640, 480)
-                    let covarianceTexture = TextureFactory.CreateCircleTexture(game.GraphicsDevice, 10, Color.White)
                     let bumpers = new BumperBoard(communication)
                     let battery = new BatteryBoard(communication)
                     let ground = new GroundSensorBoard(communication)
@@ -69,9 +70,10 @@ namespace ProjectNavi.Entities
                             { 0, 0, 1 } })
                     }
                     let target = new Transform2D(new Vector2(2, 0), 0, Vector2.One)
-                    let steeringBehavior = scheduler.TaskUpdate.Do(
-                                            Steering.Arrival(target, vehicle, 1, 3, 0.3f)
-                                            .Parallel(Locomotion.DifferentialSteering(vehicle, differentialSteering, wheelDistance, 10)))
+                    let steeringBehavior = scheduler.TaskUpdate
+                                            .Do(Steering.Arrival(target, vehicle, 1, 3, 0.3f))
+                                            .Do(gameTime => steeringVisualizer.Steering = vehicle.Steering)
+                                            .Do(Locomotion.DifferentialSteering(vehicle, differentialSteering, wheelDistance, MathHelper.PiOver4, 10, 50, 50))
                     let visualizerLoop = scheduler.TaskUpdate
                                             .Do(time => slamVisualizer.Update())
                                             .Do(time => kinectTexture.Update())
@@ -93,18 +95,20 @@ namespace ProjectNavi.Entities
                         steeringBehavior.Subscribe(),
                         visualizerLoop.Subscribe(),
                         kinectStream.Subscribe(),
-                        //renderer.SubscribeTexture(covarianceTransform, covarianceTexture),
                         backRenderer.SubscribeTexture(new Transform2D(new Vector2(-2.75f, 1.7f), 0, new Vector2(0.25f)), kinectTexture.Texture),
                         renderer.SubscribeTexture(transform, texture),
                         //renderer.SubscribeText(transform, font, () => text.ToString()),
                         renderer.SubscribeText(new Transform2D(-Vector2.One, 0, Vector2.One), font, () => markerText.ToString()),
                         primitiveRenderer.SubscribePrimitive(transform, kinectVisualizer.DrawKinectDepthMap),
                         primitiveRenderer.SubscribePrimitive(transform, sonarVisualizer.DrawSonarFrame),
+                        primitiveRenderer.SubscribePrimitive(transform, steeringVisualizer.DrawSteeringVector),
+                        primitiveRenderer.SubscribePrimitive(new Transform2D(new Vector2(-350, 200), 0, Vector2.One), freeSpaceVisualizer.DrawFreeSpace),
                         behavior.Subscribe(),
+                        colorStream.Subscribe(colorImage => kinectTexture.SetData(colorImage)),
                         kinectStream.Subscribe(kinectFrame =>
                         {
                             kinectVisualizer.Frame = kinectFrame;
-                            kinectTexture.SetData(kinectFrame.ColorImage);
+                            freeSpaceVisualizer.FreeSpace = KinectFreeSpace.ComputeFreeSpace(kinectFrame, 1500);
                             //skype.OnKinectFrame(kinectFrame);
                         }),
                         markerStream.Subscribe(markerFrame => slam.UpdateMeasurements(markerFrame)),

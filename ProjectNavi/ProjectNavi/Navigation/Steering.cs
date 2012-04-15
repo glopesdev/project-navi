@@ -19,22 +19,19 @@ namespace ProjectNavi.Navigation
             return new Vector2(cartesian.Length(), (float)Math.Atan2(cartesian.Y, cartesian.X));
         }
 
-        public static IEnumerable<Action<GameTime>> Arrival(Transform2D target, Vehicle agent, float minSpeed, float maxSpeed, float tolerance)
+        public static Action<GameTime> Arrival(Transform2D target, Vehicle agent, float minSpeed, float maxSpeed, float tolerance)
         {
-            while (true)
+            return gameTime =>
             {
-                yield return gameTime =>
+                var desiredVelocity = (target.Position - agent.Transform.Position);
+                //desiredVelocity += minSpeed * Vector2.Normalize(desiredVelocity);
+                desiredVelocity = desiredVelocity.Truncate(maxSpeed);
+                if (desiredVelocity.Length() > tolerance)
                 {
-                    var desiredVelocity = (target.Position - agent.Transform.Position);
-                    desiredVelocity += minSpeed * Vector2.Normalize(desiredVelocity);
-                    desiredVelocity = desiredVelocity.Truncate(maxSpeed);
-                    if (desiredVelocity.Length() > tolerance)
-                    {
-                        //agent.Steering += CartesianToPolar(desiredVelocity - PolarToCartesian(agent.Velocity));
-                        agent.Steering += CartesianToPolar(desiredVelocity);
-                    }
-                };
-            }
+                    //agent.Steering += CartesianToPolar(desiredVelocity - PolarToCartesian(agent.Velocity));
+                    agent.Steering += desiredVelocity;
+                }
+            };
         }
     }
 }
