@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework;
 using ProjectNavi.Localization;
 using MathNet.Numerics.LinearAlgebra.Generic;
 using MathNet.Numerics.LinearAlgebra.Double;
+using System.Reactive.Disposables;
 
 namespace ProjectNavi.Entities
 {
@@ -18,9 +19,11 @@ namespace ProjectNavi.Entities
         SlamController controller;
         List<SlamElement> elements;
         Texture2D covarianceTexture;
+        SpriteFont font;
 
         public SlamVisualizer(Game game, SpriteRenderer renderer, SlamController controller)
         {
+            font = game.Content.Load<SpriteFont>("DebugFont");
             covarianceTexture = TextureFactory.CreateCircleTexture(game.GraphicsDevice, 10, Color.White);
             elements = new List<SlamElement>();
             this.controller = controller;
@@ -34,6 +37,12 @@ namespace ProjectNavi.Entities
             {
                 var transform = new Transform2D();
                 var render = renderer.SubscribeTexture(transform, covarianceTexture);
+                if (elements.Count > 0)
+                {
+                    var landmarkId = controller.GetLandmarkId(elements.Count - 1);
+                    var text = renderer.SubscribeText(transform, font, () => landmarkId.ToString(), Color.Red);
+                    render = new CompositeDisposable(render, text);
+                }
                 elements.Add(new SlamElement(render, transform));
             }
 

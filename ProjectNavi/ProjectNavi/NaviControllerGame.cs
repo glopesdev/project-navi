@@ -92,26 +92,22 @@ namespace ProjectNavi
                 vision = workflowBuilder.Workflow.Build();
                 visionLoaded = vision.Load();
 
-                IObservable<IplImage> colorStream;
                 IObservable<KinectFrame> kinectStream;
-                IObservable<MarkerFrame> markerStream;
+                IObservable<Tuple<IplImage, MarkerFrame>> markerStream;
                 var connections = vision.Connections.ToArray();
-                if (connections.Length > 2)
+                if (connections.Length > 1)
                 {
-                    colorStream = Expression.Lambda<Func<IObservable<IplImage>>>(connections[1]).Compile()();
                     kinectStream = Expression.Lambda<Func<IObservable<KinectFrame>>>(connections[0]).Compile()();
-                    markerStream = Expression.Lambda<Func<IObservable<MarkerFrame>>>(connections[2]).Compile()();
+                    markerStream = Expression.Lambda<Func<IObservable<Tuple<IplImage, MarkerFrame>>>>(connections[1]).Compile()();
                 }
                 else
                 {
                     kinectStream = Observable.Never<KinectFrame>();
-                    colorStream = Expression.Lambda<Func<IObservable<IplImage>>>(connections[0]).Compile()();
-                    markerStream = Expression.Lambda<Func<IObservable<MarkerFrame>>>(connections[1]).Compile()();
+                    markerStream = Expression.Lambda<Func<IObservable<Tuple<IplImage, MarkerFrame>>>>(connections[0]).Compile()();
                 }
 
-                Services.AddService(typeof(IObservable<IplImage>), colorStream);
                 Services.AddService(typeof(IObservable<KinectFrame>), kinectStream);
-                Services.AddService(typeof(IObservable<MarkerFrame>), markerStream);
+                Services.AddService(typeof(IObservable<Tuple<IplImage, MarkerFrame>>), markerStream);
             }
 
             // TODO: use this.Content to load your game content here
