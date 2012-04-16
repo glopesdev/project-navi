@@ -16,8 +16,8 @@ namespace ProjectNavi.Hardware
         ICommunicationManager manager;
         private WheelVelocity currentVelocity;
         private WheelVelocity previousVelocity;
-        float accelerationWeight = 1f;
-        float breakingWeight = 0.1f;
+        float accelerationWeight = 0.8f;
+        float breakingWeight = 0.8f;
 
         public DifferentialSteeringBoard(ICommunicationManager communicationManager, double wheelRadius, int wheelClicks)
             : this(communicationManager, wheelRadius, wheelClicks, 1f, 1f)
@@ -60,7 +60,6 @@ namespace ProjectNavi.Hardware
                 leftWeight = breakingWeight;
             if (previousVelocity.LeftVelocity == 0)
                 leftWeight = accelerationWeight;
-
             var rightWeight = (Math.Abs(currentVelocity.RightVelocity) - Math.Abs(previousVelocity.RightVelocity) > 0) ? accelerationWeight : breakingWeight;
             if (Math.Sign(currentVelocity.RightVelocity) != Math.Sign(previousVelocity.RightVelocity))
                 rightWeight = breakingWeight;
@@ -76,19 +75,28 @@ namespace ProjectNavi.Hardware
 
         public static byte[] ParseUpdateWheelVelocity(WheelVelocity wheelVelocity, byte setWheelVelocityCode, int wheelClicks)
         {
+            int minValue = 7;
             var velocity = wheelVelocity;
             //1050 ex 588 clicks por tempo de amostragem
-            short leftVelocity = (short)-velocity.LeftVelocity;
-            short rightVelocity = (short)velocity.RightVelocity;
+            var leftVelocity = -velocity.LeftVelocity;
+            var rightVelocity = velocity.RightVelocity;
 
+            if (leftVelocity != 0 && Math.Abs(leftVelocity) < minValue)
+            {
+                leftVelocity = (Math.Sign(leftVelocity) * minValue);
+            }
+            if (rightVelocity != 0 && Math.Abs(rightVelocity) < minValue)
+            {
+                rightVelocity = (Math.Sign(rightVelocity) * minValue);
+            }
            
             //Trace.WriteLine(leftVelocity + " " + rightVelocity);
             var command = new byte[5];
             command[0] = setWheelVelocityCode;
-            command[1] = (byte)(rightVelocity >> 8);
-            command[2] = (byte)rightVelocity;
-            command[3] = (byte)(leftVelocity >> 8);
-            command[4] = (byte)leftVelocity;
+            command[1] = (byte)((short)rightVelocity >> 8);
+            command[2] = (byte)(short)rightVelocity;
+            command[3] = (byte)((short)leftVelocity >> 8);
+            command[4] = (byte)(short)leftVelocity;
             return command;
         }
     }
