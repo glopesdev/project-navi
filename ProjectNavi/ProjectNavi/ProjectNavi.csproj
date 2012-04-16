@@ -92,7 +92,9 @@
     <Compile Include="Entities\SlamController.cs" />
     <Compile Include="Entities\SlamVisualizer.cs" />
     <Compile Include="Entities\SmartObject.cs" />
-    <Compile Include="Entities\TaskProvider.cs" />
+    <Compile Include="Tasks\ActionPlayer.cs" />
+    <Compile Include="Tasks\PlaySound.cs" />
+    <Compile Include="Tasks\TaskProvider.cs" />
     <Compile Include="Graphics\FreeSpaceVisualizer.cs" />
     <Compile Include="Graphics\IplImageTexture.cs" />
     <Compile Include="Graphics\KinectVisualizer.cs" />
