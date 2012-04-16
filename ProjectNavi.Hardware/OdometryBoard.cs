@@ -46,13 +46,13 @@ namespace ProjectNavi.Hardware
 
         public static OdometryMeasurement ParseOdometryResponse(byte[] response, double wheelClicks, double wheelRadius, double wheelDistance)
         {
-            var rightClicks = (short)((response[0] << 8) + response[1]);
-            var leftClicks = (short)((response[2] << 8) + response[3]);
+            var leftClicks = (short)((response[0] << 8) + response[1]);
+            var rightClicks = (short)((response[2] << 8) + response[3]);
 
            // Trace.WriteLine(leftClicks + " " + rightClicks);
 
-            var distanceLeft = leftClicks * TwoPi * wheelRadius / wheelClicks;
-            var distanceRight = -rightClicks * TwoPi * wheelRadius / wheelClicks;
+            var distanceLeft = -leftClicks * TwoPi * wheelRadius / wheelClicks;
+            var distanceRight = rightClicks * TwoPi * wheelRadius / wheelClicks;
 
             var linearDisplacement = (distanceLeft + distanceRight) / 2;
             var angularDisplacement = (distanceRight - distanceLeft) / wheelDistance;

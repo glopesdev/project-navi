@@ -22,16 +22,16 @@ namespace ProjectNavi.Navigation
                 double left, right;
                 if (Math.Abs(angularSteering) < inPlaceThreshold)
                 {
-                    left = linearGain * linearSteering - angularGain * halfDistance * angularSteering;
-                    right = linearGain * linearSteering + angularGain * halfDistance * angularSteering;
+                    left = linearGain * linearSteering + angularGain * halfDistance * angularSteering;
+                    right = linearGain * linearSteering - angularGain * halfDistance * angularSteering;
                 }
                 else
                 {
                     var rotationDirection = Math.Sign(angularSteering);
                     if (rotationDirection == 0)
                         rotationDirection = 1;
-                    right = inPlaceAngularGain * halfDistance * vehicle.Steering.Length() * rotationDirection;
-                    left = -right;
+                    left = inPlaceAngularGain * halfDistance * vehicle.Steering.Length() * rotationDirection;
+                    right = -left;
                 }
 
                 actuators.UpdateWheelVelocity(new WheelVelocity(left, right));
