@@ -36,8 +36,8 @@ namespace ProjectNavi.Entities
 
             return (from magabot in Enumerable.Range(0, 1)
                     let wheelClicks = 3900
-                    let wheelDistance = 0.345f
-                    let wheelRadius = 0.0467f
+                    let wheelDistance = 0.357f
+                    let wheelRadius = 0.0475f
                     let vehicle = new Vehicle()
                     let slam = new SlamController(vehicle)
                     let slamVisualizer = new SlamVisualizer(game, backRenderer, slam)
@@ -72,12 +72,12 @@ namespace ProjectNavi.Entities
                     //let target = new Transform2D(new Vector2(1, 0), 0, Vector2.One)
                     let target = new Transform2D()
                     let targetTexture = TextureFactory.CreateCircleTexture(game.GraphicsDevice, 2, Color.Violet)
-                    let path = new[] { Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero }
+                    let path = new[] { Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero,Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero }
                     let steeringBehavior = scheduler.TaskUpdate
                                             .Do(Steering.PathFollow(target, path, vehicle, 1f, 3, 0.05f))
                                             //.Do(Steering.Arrival(target, vehicle, 1, 3, 0.3f))
                                             .Do(gameTime => steeringVisualizer.Steering = vehicle.Steering)
-                                            .Do(Locomotion.DifferentialSteering(vehicle, differentialSteering, wheelDistance, MathHelper.Pi / 25, 10, 15, 30))
+                                            .Do(Locomotion.DifferentialSteering(vehicle, differentialSteering, wheelDistance, MathHelper.Pi / 16, 10, 100, 3))
                     let visualizerLoop = scheduler.TaskUpdate
                                             .Do(time => slamVisualizer.Update())
                                             .Do(time => kinectTexture.Update())

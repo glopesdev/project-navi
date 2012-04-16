@@ -171,7 +171,7 @@ namespace ProjectNavi.Hardware
         }
         public void Left()
         {
-            DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-MaxVelocity, MaxVelocity));  
+            DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(MaxVelocity, -MaxVelocity));  
         }
         public void Right()
         {
