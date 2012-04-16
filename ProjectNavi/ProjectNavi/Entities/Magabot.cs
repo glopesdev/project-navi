@@ -78,7 +78,7 @@ namespace ProjectNavi.Entities
                     let path = new[] { Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero }
                     let playActions = scheduler.TaskUpdate.Do(actionPlayer.Update)
                     let steeringBehavior = scheduler.TaskUpdate
-                                            .TakeWhile(Steering.PathFollow(target, path, vehicle, 0.5f, 3, 0.05f))
+                                            .Do(Steering.PathFollow(target, path, vehicle, 0.5f, 3, 0.05f))
                                             //.Do(Steering.Arrival(target, vehicle, 1, 3, 0.3f))
                                             .Do(gameTime => steeringVisualizer.Steering = vehicle.Steering)
                                             .Do(Locomotion.DifferentialSteering(vehicle, differentialSteering, wheelDistance, MathHelper.Pi / 16, 10, 100, 3))
