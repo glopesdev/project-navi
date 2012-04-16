@@ -18,13 +18,13 @@
         </Source>
       </Expression>
       <Expression xsi:type="q3:ThreadPool" />
-      <Expression xsi:type="q3:ThreadPool" />
+      <Expression xsi:type="Zip" />
     </Nodes>
     <Edges>
       <Edge>
         <From>0</From>
-        <To>2</To>
-        <Label>Source</Label>
+        <To>3</To>
+        <Label>Other</Label>
       </Edge>
       <Edge>
         <From>1</From>
@@ -34,6 +34,11 @@
       <Edge>
         <From>1</From>
         <To>3</To>
+        <Label>Source</Label>
+      </Edge>
+      <Edge>
+        <From>3</From>
+        <To>2</To>
         <Label>Source</Label>
       </Edge>
     </Edges>

@@ -23,6 +23,8 @@ using ProjectNavi.Graphics;
 using ProjectNavi.Navigation;
 using System.Reactive.Concurrency;
 using OpenCV.Net;
+using ProjectNavi.Tasks;
+using Microsoft.Xna.Framework.Input;
 
 namespace ProjectNavi.Entities
 {
@@ -30,11 +32,11 @@ namespace ProjectNavi.Entities
     {
         public static IDisposable Create(Game game, SpriteRenderer renderer, SpriteRenderer backRenderer, PrimitiveBatchRenderer primitiveRenderer, TaskScheduler scheduler, ICommunicationManager communication)
         {
-            var colorStream = game.Services.GetService<IObservable<IplImage>>();
             var kinectStream = game.Services.GetService<IObservable<KinectFrame>>();
-            var markerStream = game.Services.GetService<IObservable<MarkerFrame>>();
+            var markerStream = game.Services.GetService<IObservable<Tuple<IplImage, MarkerFrame>>>();
 
             return (from magabot in Enumerable.Range(0, 1)
+                    //let wheelClicks = 1400
                     let wheelClicks = 3900
                     let wheelDistance = 0.357f
                     let wheelRadius = 0.0475f
@@ -45,6 +47,7 @@ namespace ProjectNavi.Entities
                     let sonarVisualizer = new SonarVisualizer()
                     let steeringVisualizer = new SteeringVisualizer()
                     let freeSpaceVisualizer = new FreeSpaceVisualizer()
+                    let actionPlayer = new ActionPlayer(game, game.Services)
                     let markerText = new StringBuilder()
                     let text = new StringBuilder()
                     let transform = vehicle.Transform
@@ -59,7 +62,7 @@ namespace ProjectNavi.Entities
                     let sonars = new SonarsBoard(communication)
                     let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius, wheelClicks)
                     let odometry = new OdometryBoard(communication, wheelClicks, wheelRadius, wheelDistance)
-                    let magabotState = new MagabotState(leds, differentialSteering,bumpers,battery,ground, sonars)
+                    let magabotState = new MagabotState(leds, differentialSteering, bumpers, battery, ground, sonars)
                     //let skype = new MainWindow(magabotState)
                     let kalman = new KalmanFilter
                     {
@@ -72,9 +75,10 @@ namespace ProjectNavi.Entities
                     //let target = new Transform2D(new Vector2(1, 0), 0, Vector2.One)
                     let target = new Transform2D()
                     let targetTexture = TextureFactory.CreateCircleTexture(game.GraphicsDevice, 2, Color.Violet)
-                    let path = new[] { Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero,Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero }
+                    let path = new[] { Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero }
+                    let playActions = scheduler.TaskUpdate.Do(actionPlayer.Update)
                     let steeringBehavior = scheduler.TaskUpdate
-                                            .Do(Steering.PathFollow(target, path, vehicle, 1f, 3, 0.05f))
+                                            .TakeWhile(Steering.PathFollow(target, path, vehicle, 0.5f, 3, 0.05f))
                                             //.Do(Steering.Arrival(target, vehicle, 1, 3, 0.3f))
                                             .Do(gameTime => steeringVisualizer.Steering = vehicle.Steering)
                                             .Do(Locomotion.DifferentialSteering(vehicle, differentialSteering, wheelDistance, MathHelper.Pi / 16, 10, 100, 3))
@@ -96,6 +100,7 @@ namespace ProjectNavi.Entities
                         sonars,
                         odometry,
                         differentialSteering,
+                        playActions.Subscribe(),
                         steeringBehavior.Subscribe(),
                         visualizerLoop.Subscribe(),
                         kinectStream.Subscribe(),
@@ -103,22 +108,31 @@ namespace ProjectNavi.Entities
                         renderer.SubscribeTexture(transform, texture),
                         renderer.SubscribeTexture(target, targetTexture),
                         //renderer.SubscribeText(transform, font, () => text.ToString()),
-                        renderer.SubscribeText(new Transform2D(-Vector2.One, 0, Vector2.One), font, () => markerText.ToString()),
+                        renderer.SubscribeText(new Transform2D(-Vector2.One, 0, Vector2.One), font, () => markerText.ToString(), Color.White),
                         primitiveRenderer.SubscribePrimitive(transform, kinectVisualizer.DrawKinectDepthMap),
                         primitiveRenderer.SubscribePrimitive(transform, sonarVisualizer.DrawSonarFrame),
                         primitiveRenderer.SubscribePrimitive(transform, steeringVisualizer.DrawSteeringVector),
                         primitiveRenderer.SubscribePrimitive(new Transform2D(new Vector2(-350, 200), 0, Vector2.One), freeSpaceVisualizer.DrawFreeSpace),
                         behavior.Subscribe(),
-                        colorStream.Subscribe(colorImage => kinectTexture.SetData(colorImage)),
                         kinectStream.Subscribe(kinectFrame =>
                         {
                             kinectVisualizer.Frame = kinectFrame;
                             freeSpaceVisualizer.FreeSpace = KinectFreeSpace.ComputeFreeSpace(kinectFrame, 1500);
                             //skype.OnKinectFrame(kinectFrame);
                         }),
-                        markerStream.Subscribe(markerFrame => slam.UpdateMeasurements(markerFrame)),
+                        markerStream.Subscribe(markerOutput =>
+                        {
+                            var image = markerOutput.Item1.Clone();
+                            foreach (var marker in markerOutput.Item2.DetectedMarkers)
+                            {
+                                marker.Draw(image.DangerousGetHandle(), 0, 0, 255, 2, true);
+                            }
+
+                            kinectTexture.SetData(image);
+                            slam.UpdateMeasurements(markerOutput.Item2);
+                        }),
                         differentialSteering.CommandChecksum.Subscribe(m => bumpers.GetBumperState()),
-                        bumpers.BumpersMeasure.Subscribe(m => 
+                        bumpers.BumpersMeasure.Subscribe(m =>
                         {
                             battery.GetBatteryState();
                         }),
@@ -136,7 +150,7 @@ namespace ProjectNavi.Entities
                         sonars.SonarsBoardMeasure.Subscribe(m =>
                         {
                             sonarVisualizer.SonarFrame = m;
-                            for(int count =0; count < m.Length; count++)
+                            for (int count = 0; count < m.Length; count++)
                             {
                                 //magabotState
                                 var sonar = m[count];

@@ -21,15 +21,14 @@
         </Selector>
       </Expression>
       <Expression xsi:type="q2:ThreadPool" />
-      <Expression xsi:type="q2:ThreadPool" />
-      <Expression xsi:type="MemberSelector">
-        <Selector>
-          <string>ColorImage</string>
-        </Selector>
-      </Expression>
-      <Expression xsi:type="q2:ThreadPool" />
+      <Expression xsi:type="Zip" />
     </Nodes>
     <Edges>
+      <Edge>
+        <From>0</From>
+        <To>4</To>
+        <Label>Other</Label>
+      </Edge>
       <Edge>
         <From>1</From>
         <To>2</To>
@@ -37,27 +36,17 @@
       </Edge>
       <Edge>
         <From>1</From>
-        <To>4</To>
-        <Label>Source</Label>
-      </Edge>
-      <Edge>
-        <From>1</From>
-        <To>5</To>
-        <Label>Source</Label>
-      </Edge>
-      <Edge>
-        <From>2</From>
         <To>3</To>
         <Label>Source</Label>
       </Edge>
       <Edge>
-        <From>3</From>
+        <From>2</From>
         <To>0</To>
         <Label>Source</Label>
       </Edge>
       <Edge>
-        <From>5</From>
-        <To>6</To>
+        <From>2</From>
+        <To>4</To>
         <Label>Source</Label>
       </Edge>
     </Edges>

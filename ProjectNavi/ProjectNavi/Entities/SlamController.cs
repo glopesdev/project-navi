@@ -50,6 +50,11 @@ namespace ProjectNavi.Entities
             get { return slam; }
         }
 
+        public int GetLandmarkId(int landmarkIndex)
+        {
+            return landmarkIndices.First(pair => pair.Value == landmarkIndex).Key;
+        }
+
         public void UpdateMeasurements(MarkerFrame markerFrame)
         {
             measurements = markerFrame.DetectedMarkers.Select(marker =>
