@@ -9,6 +9,10 @@ namespace ProjectNavi.Navigation
 {
     public static class Steering
     {
+        public const float DefaultMinSpeed = 0.5f;
+        public const float DefaultMaxSpeed = 3f;
+        public const float DefaultTolerance = 0.05f;
+
         public static Vector2 PolarToCartesian(Vector2 polar)
         {
             return new Vector2(polar.X * (float)Math.Cos(polar.Y), polar.X * (float)Math.Sin(polar.Y));

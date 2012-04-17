@@ -52,7 +52,7 @@ namespace ProjectNavi
             renderer = new SpriteRenderer(this);
             backRenderer = new SpriteRenderer(this);
             primitiveRenderer = new PrimitiveBatchRenderer(this);
-            renderer.PixelsPerWorldUnit = backRenderer.PixelsPerWorldUnit = 100; //100 pixels/meter
+            renderer.PixelsPerWorldUnit = backRenderer.PixelsPerWorldUnit = Constants.PixelsPerWorldUnit; //100 pixels/meter
             scheduler = new TaskScheduler(this);
             Components.Add(scheduler);
             Components.Add(backRenderer);
@@ -71,7 +71,8 @@ namespace ProjectNavi
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            communication = new CommunicationManagerSerial("COM12", 9600);
+            //communication = new CommunicationManagerSerial("COM30", 9600);
+            communication = new CommunicationManagerSerial("COM30", 57600);
             base.Initialize();
         }
 

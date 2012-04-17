@@ -92,7 +92,7 @@ namespace ProjectNavi.Graphics
                             var ray = CalculateCursorRay(viewport, new Vector2(j, i), DepthProjectionMatrix, Matrix.CreateLookAt(Vector3.Zero, -Vector3.UnitZ, Vector3.Up));
                             var obstacle = (depth / 1000f) * new Vector2(-ray.Direction.Z, ray.Direction.X);
                             obstacle = obstacle.Rotate(transform.Rotation) + transform.Position;
-                            obstacle *= 100 * new Vector2(1, -1);
+                            obstacle *= Constants.PixelsPerWorldUnit * new Vector2(1, -1);
 
                             var color = HsvToRgb(new Vector3(i, 1, 1));
                             primitiveBatch.AddVertex(obstacle, color);
