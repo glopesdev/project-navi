@@ -36,8 +36,8 @@ namespace ProjectNavi.Graphics
                         SonarTransforms[i].Position.Y + measurement * (float)Math.Sin(SonarTransforms[i].Rotation));
                     var sonarStart = SonarTransforms[i].Position.Rotate(transform.Rotation) + transform.Position;
                     obstacle = obstacle.Rotate(transform.Rotation) + transform.Position;
-                    sonarStart *= 100 * new Vector2(1, -1);
-                    obstacle *= 100 * new Vector2(1, -1);
+                    sonarStart *= Constants.PixelsPerWorldUnit * new Vector2(1, -1);
+                    obstacle *= Constants.PixelsPerWorldUnit * new Vector2(1, -1);
 
                     //var offset = 4 * Vector2.UnitY.Rotate(transform.Rotation);
                     //var offset = Vector2.Normalize((obstacle - sonarStart).Rotate(MathHelper.PiOver2));

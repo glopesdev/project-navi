@@ -16,8 +16,8 @@ namespace ProjectNavi.Graphics
         public void DrawSteeringVector(Transform2D transform, PrimitiveBatch primitiveBatch)
         {
             primitiveBatch.Begin(PrimitiveType.LineList);
-            primitiveBatch.AddVertex(100 * new Vector2(1, -1) * transform.Position, Color.Green);
-            primitiveBatch.AddVertex(100 * new Vector2(1, -1) * (Steering + transform.Position), Color.Green);
+            primitiveBatch.AddVertex(Constants.PixelsPerWorldUnit * new Vector2(1, -1) * transform.Position, Color.Green);
+            primitiveBatch.AddVertex(Constants.PixelsPerWorldUnit * new Vector2(1, -1) * (Steering + transform.Position), Color.Green);
             primitiveBatch.End();
         }
     }

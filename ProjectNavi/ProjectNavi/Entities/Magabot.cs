@@ -25,11 +25,30 @@ using System.Reactive.Concurrency;
 using OpenCV.Net;
 using ProjectNavi.Tasks;
 using Microsoft.Xna.Framework.Input;
+using System.ComponentModel.Design;
 
 namespace ProjectNavi.Entities
 {
     public class Magabot
     {
+        static void ActivateMarker(ActionPlayer player, Vehicle vehicle, NavigationEnvironment environment, SlamController slam, int markerId, IServiceProvider provider)
+        {
+            var markerPosition = slam.GetLandmarkPosition(markerId);
+            if (markerPosition == null) return;
+
+            var smartObject = environment.Landmarks.FirstOrDefault(landmark => landmark.MarkerId == markerId);
+            if (smartObject == null) return;
+
+            var task = smartObject.Task;
+            if (task == null) return;
+
+            var markerTransform = new Transform2D(markerPosition.Value, 0, Vector2.One);
+            var serviceProvider = new ServiceContainer(provider);
+            serviceProvider.AddService(typeof(Transform2D), markerTransform);
+            serviceProvider.AddService(typeof(Vehicle), vehicle);
+            player.PlayAction(task, serviceProvider);
+        }
+
         public static IDisposable Create(Game game, SpriteRenderer renderer, SpriteRenderer backRenderer, PrimitiveBatchRenderer primitiveRenderer, TaskScheduler scheduler, ICommunicationManager communication)
         {
             var kinectStream = game.Services.GetService<IObservable<KinectFrame>>();
@@ -38,8 +57,8 @@ namespace ProjectNavi.Entities
             return (from magabot in Enumerable.Range(0, 1)
                     //let wheelClicks = 1400
                     let wheelClicks = 3900
-                    let wheelDistance = 0.357f
-                    let wheelRadius = 0.0475f
+                    let wheelDistance = 0.345f
+                    let wheelRadius = 0.045f
                     let vehicle = new Vehicle()
                     let slam = new SlamController(vehicle)
                     let slamVisualizer = new SlamVisualizer(game, backRenderer, slam)
@@ -47,7 +66,8 @@ namespace ProjectNavi.Entities
                     let sonarVisualizer = new SonarVisualizer()
                     let steeringVisualizer = new SteeringVisualizer()
                     let freeSpaceVisualizer = new FreeSpaceVisualizer()
-                    let actionPlayer = new ActionPlayer(game, game.Services)
+                    let environment = game.Content.Load<NavigationEnvironment>("ChampalimaudLandmarks")
+                    let actionPlayer = new ActionPlayer(game)
                     let markerText = new StringBuilder()
                     let text = new StringBuilder()
                     let transform = vehicle.Transform
@@ -75,10 +95,24 @@ namespace ProjectNavi.Entities
                     //let target = new Transform2D(new Vector2(1, 0), 0, Vector2.One)
                     let target = new Transform2D()
                     let targetTexture = TextureFactory.CreateCircleTexture(game.GraphicsDevice, 2, Color.Violet)
-                    let path = new[] { Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero }
+                    let path = new[] { Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero, Vector2.UnitX, Vector2.One, Vector2.UnitY, Vector2.Zero }
                     let playActions = scheduler.TaskUpdate.Do(actionPlayer.Update)
+                    let activateMarker = scheduler.TaskUpdate.Do(gameTime =>
+                    {
+                        var keyboard = Keyboard.GetState();
+                        if (keyboard.IsKeyDown(Keys.D0)) ActivateMarker(actionPlayer, vehicle, environment, slam, 0, game.Services);
+                        if (keyboard.IsKeyDown(Keys.D1)) ActivateMarker(actionPlayer, vehicle, environment, slam, 1, game.Services);
+                        if (keyboard.IsKeyDown(Keys.D2)) ActivateMarker(actionPlayer, vehicle, environment, slam, 2, game.Services);
+                        if (keyboard.IsKeyDown(Keys.D3)) ActivateMarker(actionPlayer, vehicle, environment, slam, 3, game.Services);
+                        if (keyboard.IsKeyDown(Keys.D4)) ActivateMarker(actionPlayer, vehicle, environment, slam, 4, game.Services);
+                        if (keyboard.IsKeyDown(Keys.D5)) ActivateMarker(actionPlayer, vehicle, environment, slam, 5, game.Services);
+                        if (keyboard.IsKeyDown(Keys.D6)) ActivateMarker(actionPlayer, vehicle, environment, slam, 6, game.Services);
+                        if (keyboard.IsKeyDown(Keys.D7)) ActivateMarker(actionPlayer, vehicle, environment, slam, 7, game.Services);
+                        if (keyboard.IsKeyDown(Keys.D8)) ActivateMarker(actionPlayer, vehicle, environment, slam, 8, game.Services);
+                        if (keyboard.IsKeyDown(Keys.D9)) ActivateMarker(actionPlayer, vehicle, environment, slam, 9, game.Services);
+                    })
                     let steeringBehavior = scheduler.TaskUpdate
-                                            .Do(Steering.PathFollow(target, path, vehicle, 0.5f, 3, 0.05f))
+                                            //.Do(Steering.PathFollow(target, path, vehicle, Steering.DefaultMinSpeed, Steering.DefaultMaxSpeed, Steering.DefaultTolerance))
                                             //.Do(Steering.Arrival(target, vehicle, 1, 3, 0.3f))
                                             .Do(gameTime => steeringVisualizer.Steering = vehicle.Steering)
                                             .Do(Locomotion.DifferentialSteering(vehicle, differentialSteering, wheelDistance, MathHelper.Pi / 16, 10, 100, 3))
@@ -101,6 +135,7 @@ namespace ProjectNavi.Entities
                         odometry,
                         differentialSteering,
                         playActions.Subscribe(),
+                        activateMarker.Subscribe(),
                         steeringBehavior.Subscribe(),
                         visualizerLoop.Subscribe(),
                         kinectStream.Subscribe(),

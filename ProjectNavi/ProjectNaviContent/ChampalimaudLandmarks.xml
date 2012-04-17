@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<XnaContent>
+  <!-- TODO: replace this Asset with your own XML asset data. -->
+  <Asset Type="ProjectNavi.Tasks.NavigationEnvironment">
+    <Landmarks>
+      <Item>
+        <Name>Coffee Machine</Name>
+        <MarkerId>4</MarkerId>
+        <Task Type="ProjectNavi.Tasks.Sequence">
+          <Tasks>
+            <Item Type="ProjectNavi.Tasks.MoveToLandmark">
+              <Tolerance>0.1</Tolerance>
+            </Item>
+            <Item Type="ProjectNavi.Tasks.PlaySound">
+              <SoundName>pongblipf5</SoundName>
+            </Item>
+          </Tasks>
+        </Task>
+      </Item>
+    </Landmarks>
+  </Asset>
+</XnaContent>
