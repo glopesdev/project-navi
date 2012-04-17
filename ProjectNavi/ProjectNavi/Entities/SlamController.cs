@@ -35,8 +35,8 @@ namespace ProjectNavi.Entities
             });
             slam.MeasurementNoise = new DenseMatrix(new[,]
             {
-                {0.1, 0},
-                {0, 0.1}
+                {1.0, 0},
+                {0, 1.0}
             });
 
             landmarkIndices = new Dictionary<int, int>();
@@ -55,13 +55,27 @@ namespace ProjectNavi.Entities
             return landmarkIndices.First(pair => pair.Value == landmarkIndex).Key;
         }
 
+        public Vector2? GetLandmarkPosition(int markerId)
+        {
+            int landmarkIndex;
+            if (!landmarkIndices.TryGetValue(markerId, out landmarkIndex))
+            {
+                return null;
+            }
+
+            var stateVectorIndex = EkfSlam.LandmarkDim * landmarkIndex + EkfSlam.StateDim;
+            var landmarkX = slam.Mean[stateVectorIndex];
+            var landmarkY = slam.Mean[stateVectorIndex + 1];
+            return new Vector2((float)landmarkX, (float)landmarkY);
+        }
+
         public void UpdateMeasurements(MarkerFrame markerFrame)
         {
             measurements = markerFrame.DetectedMarkers.Select(marker =>
             {
                 var markerTransform = marker.GetGLModelViewMatrix();
                 var markerPosition = new DenseVector(new[] { -markerTransform[14], markerTransform[12] });
-                var bearing = Math.Atan2(markerPosition[1], markerPosition[0]);
+                var bearing = -Math.Atan2(markerPosition[1], markerPosition[0]);
                 var range = markerPosition.Norm(2);
                 //System.Diagnostics.Trace.WriteLine(string.Format("mx: {0} my: {1} bearing:{2} range:{3}", markerPosition[0], markerPosition[1], bearing, range));
 
