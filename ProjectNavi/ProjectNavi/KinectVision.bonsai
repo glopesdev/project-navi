@@ -9,7 +9,7 @@
           <q1:Param1>7</q1:Param1>
           <q1:Param2>7</q1:Param2>
           <q1:CornerRefinement>Harris</q1:CornerRefinement>
-          <q1:MarkerSize>0.12</q1:MarkerSize>
+          <q1:MarkerSize>0.06</q1:MarkerSize>
         </Projection>
       </Expression>
       <Expression xsi:type="Source">

@@ -9,8 +9,8 @@ namespace ProjectNavi.Localization
 {
     public class EkfSlam
     {
-        const int StateDim = 3;
-        const int LandmarkDim = 2;
+        public const int StateDim = 3;
+        public const int LandmarkDim = 2;
 
         public EkfSlam()
         {
