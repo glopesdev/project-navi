@@ -55,23 +55,6 @@ namespace ProjectNavi.Graphics
             return new Ray(nearPoint, direction);
         }
 
-        private Color HsvToRgb(Vector3 color)
-        {
-            var h = color.X;
-            var s = color.Y;
-            var v = color.Z;
-            var c = s * v;
-            h = h / 60f;
-            var x = c * (1 - Math.Abs(h % 2 - 1));
-            if (h >= 0 && h < 1) return new Color(c, x, 0);
-            if (h >= 1 && h < 2) return new Color(x, c, 0);
-            if (h >= 2 && h < 3) return new Color(0, c, x);
-            if (h >= 3 && h < 4) return new Color(0, x, c);
-            if (h >= 4 && h < 5) return new Color(x, 0, c);
-            if (h >= 5 && h < 6) return new Color(c, 0, x);
-            return Color.Black;
-        }
-
         const int DepthStep = 4;
 
         public void DrawKinectDepthMap(Transform2D transform, PrimitiveBatch primitiveBatch)
@@ -94,7 +77,7 @@ namespace ProjectNavi.Graphics
                             obstacle = obstacle.Rotate(transform.Rotation) + transform.Position;
                             obstacle *= Constants.PixelsPerWorldUnit * new Vector2(1, -1);
 
-                            var color = HsvToRgb(new Vector3(i, 1, 1));
+                            var color = GraphicsHelper.HsvToRgb(new Vector3(i, 1, 1));
                             primitiveBatch.AddVertex(obstacle, color);
                             primitiveBatch.AddVertex(obstacle + DepthStep * Vector2.UnitX, color);
                             primitiveBatch.AddVertex(obstacle + DepthStep * Vector2.UnitY, color);

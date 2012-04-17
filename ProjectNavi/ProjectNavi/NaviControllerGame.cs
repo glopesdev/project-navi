@@ -46,9 +46,14 @@ namespace ProjectNavi
         TaskScheduler scheduler;
         ICommunicationManager communication;
 
+        RenderTarget2D renderTarget;
+        SpriteBatch spriteBatch;
+
         public NaviControllerGame()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferWidth = 1366;
+            graphics.PreferredBackBufferHeight = 768;
             renderer = new SpriteRenderer(this);
             backRenderer = new SpriteRenderer(this);
             primitiveRenderer = new PrimitiveBatchRenderer(this);
@@ -82,6 +87,8 @@ namespace ProjectNavi
         /// </summary>
         protected override void LoadContent()
         {
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            //renderTarget = new RenderTarget2D(GraphicsDevice, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
             primitiveRenderer.Projection = Matrix.CreateOrthographic(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 1);
 
             // Create the Bonsai vision workflow using a Kinect or a Webcam
@@ -158,7 +165,9 @@ namespace ProjectNavi
             renderer.ViewMatrix = backRenderer.ViewMatrix = Matrix.CreateScale(zoom);
             primitiveRenderer.View = Matrix.CreateScale(zoom);
 
+            //GraphicsDevice.SetRenderTarget(renderTarget);
             base.Draw(gameTime);
+            //GraphicsDevice.SetRenderTarget(null);
         }
     }
 }
