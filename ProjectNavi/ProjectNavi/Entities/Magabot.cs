@@ -72,7 +72,7 @@ namespace ProjectNavi.Entities
                     let text = new StringBuilder()
                     let transform = vehicle.Transform
                     let font = game.Content.Load<SpriteFont>("DebugFont")
-                    let texture = game.Content.Load<Texture2D>("magabot_cm")
+                    let texture = game.Content.Load<Texture2D>("bot")
                     let bumperTexture = game.Content.Load<Texture2D>("square")
                     let kinectTexture = new IplImageTexture(game.GraphicsDevice, 640, 480)
                     let bumpers = new BumperBoard(communication)
@@ -83,7 +83,7 @@ namespace ProjectNavi.Entities
                     let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius, wheelClicks)
                     let odometry = new OdometryBoard(communication, wheelClicks, wheelRadius, wheelDistance)
                     let magabotState = new MagabotState(leds, differentialSteering, bumpers, battery, ground, sonars)
-                    //let skype = new MainWindow(magabotState)
+                    let skype = new MainWindow(magabotState)
                     let kalman = new KalmanFilter
                     {
                         Mean = new DenseVector(3),
@@ -121,10 +121,10 @@ namespace ProjectNavi.Entities
                                             .Do(time => kinectTexture.Update())
                     let behavior = scheduler.TaskUpdate
                                             .Do(time => odometry.UpdateOdometryCommand())
-                                            //.Do(time => skype.Magabot = magabotState)
+                                            .Do(time => skype.Magabot = magabotState)
                                             .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0, 0)))
                                             .Do(time => magabotState.Leds.SetLedBoardState(255, 255, 255))
-                                            //.Do(time => skype.Show())
+                                            .Do(time => skype.Show())
                                             .Take(1)
                     select new CompositeDisposable(
                         bumpers,

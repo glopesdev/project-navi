@@ -112,7 +112,7 @@ namespace ProjectNavi
             }
 
             // TODO: use this.Content to load your game content here
-            //Grid.Create(this, renderer);
+            Grid.Create(this, backRenderer);
             magabot = Magabot.Create(this, renderer, backRenderer, primitiveRenderer, scheduler, communication);
         }
 
