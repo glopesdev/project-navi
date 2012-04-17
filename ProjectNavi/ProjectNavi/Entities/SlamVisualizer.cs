@@ -24,8 +24,9 @@ namespace ProjectNavi.Entities
         public SlamVisualizer(Game game, SpriteRenderer renderer, SlamController controller)
         {
             font = game.Content.Load<SpriteFont>("DebugFont");
-            var textureColor = new Color(255, 255, 255, 170);
-            covarianceTexture = TextureFactory.CreateCircleTexture(game.GraphicsDevice, 1000, 50, 5, 5, textureColor, Color.Black);
+            var textureColor = new Color(255, 255, 255, 100);
+            var strokeColor = new Color(0, 0, 0, 100);
+            covarianceTexture = TextureFactory.CreateCircleTexture(game.GraphicsDevice, 1000, 20, 5, 5, textureColor, strokeColor);
             elements = new List<SlamElement>();
             this.controller = controller;
             this.renderer = renderer;

@@ -73,7 +73,16 @@ namespace ProjectNavi.Entities
                     let transform = vehicle.Transform
                     let font = game.Content.Load<SpriteFont>("DebugFont")
                     let texture = game.Content.Load<Texture2D>("bot")
-                    let bumperTexture = game.Content.Load<Texture2D>("square")
+                    let bumperLeftTexture = game.Content.Load<Texture2D>("bumpLeft")
+                    let bumperRightTexture = game.Content.Load<Texture2D>("bumpRight")
+                    let bumperLeftOptions = new TextureDrawingParameters { Color = Color.Transparent }
+                    let bumperRightOptions = new TextureDrawingParameters { Color = Color.Transparent }
+                    let groundSensorLeftTexture = game.Content.Load<Texture2D>("irLeft")
+                    let groundSensorMiddleTexture = game.Content.Load<Texture2D>("irMiddle")
+                    let groundSensorRightTexture = game.Content.Load<Texture2D>("irRight")
+                    let groundSensorLeftOptions = new TextureDrawingParameters { Color = Color.White }
+                    let groundSensorMiddleOptions = new TextureDrawingParameters { Color = Color.White }
+                    let groundSensorRightOptions = new TextureDrawingParameters { Color = Color.White }
                     let kinectTexture = new IplImageTexture(game.GraphicsDevice, 640, 480)
                     let bumpers = new BumperBoard(communication)
                     let battery = new BatteryBoard(communication)
@@ -111,9 +120,13 @@ namespace ProjectNavi.Entities
                         if (keyboard.IsKeyDown(Keys.D8)) ActivateMarker(actionPlayer, vehicle, environment, slam, 8, game.Services);
                         if (keyboard.IsKeyDown(Keys.D9)) ActivateMarker(actionPlayer, vehicle, environment, slam, 9, game.Services);
                     })
+                    let safetyBump = magabotState.SafetyBump.MostRecent(false).GetEnumerator()
+                    let safetyGround = magabotState.SafetyGround.MostRecent(false).GetEnumerator()
                     let steeringBehavior = scheduler.TaskUpdate
                                             //.Do(Steering.PathFollow(target, path, vehicle, Steering.DefaultMinSpeed, Steering.DefaultMaxSpeed, Steering.DefaultTolerance))
                                             //.Do(Steering.Arrival(target, vehicle, 1, 3, 0.3f))
+                                            .Where(gameTime => { safetyBump.MoveNext(); return safetyBump.Current; })
+                                            .Where(gameTime => { safetyGround.MoveNext(); return safetyGround.Current; })
                                             .Do(gameTime => steeringVisualizer.Steering = vehicle.Steering)
                                             .Do(Locomotion.DifferentialSteering(vehicle, differentialSteering, wheelDistance, MathHelper.Pi / 16, 10, 100, 3))
                     let visualizerLoop = scheduler.TaskUpdate
@@ -121,9 +134,9 @@ namespace ProjectNavi.Entities
                                             .Do(time => kinectTexture.Update())
                     let behavior = scheduler.TaskUpdate
                                             .Do(time => odometry.UpdateOdometryCommand())
-                                            .Do(time => skype.Magabot = magabotState)
                                             .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0, 0)))
                                             .Do(time => magabotState.Leds.SetLedBoardState(255, 255, 255))
+                                            .Do(time => skype.Magabot = magabotState)
                                             .Do(time => skype.Show())
                                             .Take(1)
                     select new CompositeDisposable(
@@ -139,8 +152,14 @@ namespace ProjectNavi.Entities
                         steeringBehavior.Subscribe(),
                         visualizerLoop.Subscribe(),
                         kinectStream.Subscribe(),
-                        backRenderer.SubscribeTexture(new Transform2D(new Vector2(-2.75f, 1.7f), 0, new Vector2(0.25f)), kinectTexture.Texture),
+                        //backRenderer.SubscribeTexture(new Transform2D(new Vector2(-2.75f, 1.7f), 0, new Vector2(0.25f)), kinectTexture.Texture),
+                        backRenderer.SubscribeTexture(new Transform2D(new Vector2(-4.25f, 2.0f), 0, new Vector2(0.75f)), kinectTexture.Texture),
                         renderer.SubscribeTexture(transform, texture),
+                        renderer.SubscribeTexture(transform, new Transform2D(), bumperLeftTexture, bumperLeftOptions),
+                        renderer.SubscribeTexture(transform, new Transform2D(), bumperRightTexture, bumperRightOptions),
+                        renderer.SubscribeTexture(transform, new Transform2D(), groundSensorLeftTexture, groundSensorLeftOptions),
+                        renderer.SubscribeTexture(transform, new Transform2D(), groundSensorMiddleTexture, groundSensorMiddleOptions),
+                        renderer.SubscribeTexture(transform, new Transform2D(), groundSensorRightTexture, groundSensorRightOptions),
                         renderer.SubscribeTexture(target, targetTexture),
                         //renderer.SubscribeText(transform, font, () => text.ToString()),
                         renderer.SubscribeText(new Transform2D(-Vector2.One, 0, Vector2.One), font, () => markerText.ToString(), Color.White),
@@ -169,6 +188,8 @@ namespace ProjectNavi.Entities
                         differentialSteering.CommandChecksum.Subscribe(m => bumpers.GetBumperState()),
                         bumpers.BumpersMeasure.Subscribe(m =>
                         {
+                            bumperLeftOptions.Color = m.BumperLeft ? Color.White : Color.Transparent;
+                            bumperRightOptions.Color = m.BumperRight ? Color.White : Color.Transparent;
                             battery.GetBatteryState();
                         }),
                         battery.BatteryMeasure.Subscribe(m =>
@@ -179,6 +200,10 @@ namespace ProjectNavi.Entities
                         }),
                         ground.GroundSensorsMeasure.Subscribe(m =>
                         {
+                            var sensorScale = 180 / 1023f;
+                            groundSensorLeftOptions.Color = GraphicsHelper.HsvToRgb(new Vector3(180 - m.SensorLeft * sensorScale, 1, 1));
+                            groundSensorMiddleOptions.Color = GraphicsHelper.HsvToRgb(new Vector3(180 - m.SensorMiddle * sensorScale, 1, 1));
+                            groundSensorRightOptions.Color = GraphicsHelper.HsvToRgb(new Vector3(180 - m.SensorRight * sensorScale, 1, 1));
                             text.AppendLine(string.Format("IR: {0} IR: {1} IR: {2}", m.SensorLeft, m.SensorMiddle, m.SensorRight));
                             sonars.GetSonarsBoardState();
                         }),
