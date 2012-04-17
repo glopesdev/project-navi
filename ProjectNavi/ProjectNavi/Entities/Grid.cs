@@ -16,7 +16,7 @@ namespace ProjectNavi.Entities
         {
             return (from grid in Enumerable.Range(0, 1)
                     let transform = new Transform2D()
-                    let texture = game.Content.Load<Texture2D>("grid")
+                    let texture = game.Content.Load<Texture2D>("map")
                     select new CompositeDisposable(
                         renderer.SubscribeTexture(transform, texture)))
                     .First();

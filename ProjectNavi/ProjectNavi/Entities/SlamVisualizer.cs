@@ -24,7 +24,8 @@ namespace ProjectNavi.Entities
         public SlamVisualizer(Game game, SpriteRenderer renderer, SlamController controller)
         {
             font = game.Content.Load<SpriteFont>("DebugFont");
-            covarianceTexture = TextureFactory.CreateCircleTexture(game.GraphicsDevice, 10, Color.White);
+            var textureColor = new Color(255, 255, 255, 170);
+            covarianceTexture = TextureFactory.CreateCircleTexture(game.GraphicsDevice, 1000, 50, 5, 5, textureColor, Color.Black);
             elements = new List<SlamElement>();
             this.controller = controller;
             this.renderer = renderer;
@@ -36,7 +37,8 @@ namespace ProjectNavi.Entities
             for (int i = 0; i < elementsToAdd; i++)
             {
                 var transform = new Transform2D();
-                var render = renderer.SubscribeTexture(transform, covarianceTexture);
+                var scaleTransform = new Transform2D(Vector2.Zero, 0, 0.01f * Vector2.One);
+                var render = renderer.SubscribeTexture(transform, scaleTransform, covarianceTexture);
                 if (elements.Count > 0)
                 {
                     var landmarkId = controller.GetLandmarkId(elements.Count - 1);
