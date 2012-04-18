@@ -10,6 +10,7 @@ using ProjectNavi.Localization;
 using MathNet.Numerics.LinearAlgebra.Generic;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Reactive.Disposables;
+using ProjectNavi.Tasks;
 
 namespace ProjectNavi.Entities
 {
@@ -19,9 +20,10 @@ namespace ProjectNavi.Entities
         SlamController controller;
         List<SlamElement> elements;
         Texture2D covarianceTexture;
+        NavigationEnvironment environment;
         SpriteFont font;
 
-        public SlamVisualizer(Game game, SpriteRenderer renderer, SlamController controller)
+        public SlamVisualizer(Game game, SpriteRenderer renderer, SlamController controller, NavigationEnvironment environment)
         {
             font = game.Content.Load<SpriteFont>("DebugFont");
             var textureColor = new Color(255, 255, 255, 100);
@@ -30,6 +32,7 @@ namespace ProjectNavi.Entities
             elements = new List<SlamElement>();
             this.controller = controller;
             this.renderer = renderer;
+            this.environment = environment;
         }
 
         public void Update()
@@ -43,7 +46,9 @@ namespace ProjectNavi.Entities
                 if (elements.Count > 0)
                 {
                     var landmarkId = controller.GetLandmarkId(elements.Count - 1);
-                    var text = renderer.SubscribeText(transform, font, () => landmarkId.ToString(), Color.Red);
+                    var smartObject = environment.Landmarks.FirstOrDefault(landmark => landmark.MarkerId == landmarkId);
+                    var landmarkIdentifier = smartObject != null ? smartObject.Name : string.Format("tag: {0}", landmarkId);
+                    var text = renderer.SubscribeText(transform, font, () => landmarkIdentifier, Color.Red);
                     render = new CompositeDisposable(render, text);
                 }
                 elements.Add(new SlamElement(render, transform));
