@@ -31,6 +31,13 @@ namespace ProjectNavi.Entities
 {
     public class Magabot
     {
+        class Counter
+        {
+            public int Value { get; set; }
+
+            public float Rotation { get; set; }
+        }
+
         static void ActivateMarker(ActionPlayer player, Vehicle vehicle, NavigationEnvironment environment, SlamController slam, int markerId, IServiceProvider provider)
         {
             var markerPosition = slam.GetLandmarkPosition(markerId);
@@ -61,12 +68,12 @@ namespace ProjectNavi.Entities
                     let wheelRadius = 0.045f
                     let vehicle = new Vehicle()
                     let slam = new SlamController(vehicle)
-                    let slamVisualizer = new SlamVisualizer(game, backRenderer, slam)
+                    let environment = game.Content.Load<NavigationEnvironment>("ChampalimaudLandmarks")
+                    let slamVisualizer = new SlamVisualizer(game, backRenderer, slam, environment)
                     let kinectVisualizer = new KinectVisualizer(game)
                     let sonarVisualizer = new SonarVisualizer()
                     let steeringVisualizer = new SteeringVisualizer()
                     let freeSpaceVisualizer = new FreeSpaceVisualizer()
-                    let environment = game.Content.Load<NavigationEnvironment>("ChampalimaudLandmarks")
                     let actionPlayer = new ActionPlayer(game)
                     let markerText = new StringBuilder()
                     let text = new StringBuilder()
@@ -92,7 +99,7 @@ namespace ProjectNavi.Entities
                     let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius, wheelClicks)
                     let odometry = new OdometryBoard(communication, wheelClicks, wheelRadius, wheelDistance)
                     let magabotState = new MagabotState(leds, differentialSteering, bumpers, battery, ground, sonars)
-                    let skype = new MainWindow(magabotState)
+                    //let skype = new MainWindow(magabotState)
                     let kalman = new KalmanFilter
                     {
                         Mean = new DenseVector(3),
@@ -120,14 +127,46 @@ namespace ProjectNavi.Entities
                         if (keyboard.IsKeyDown(Keys.D8)) ActivateMarker(actionPlayer, vehicle, environment, slam, 8, game.Services);
                         if (keyboard.IsKeyDown(Keys.D9)) ActivateMarker(actionPlayer, vehicle, environment, slam, 9, game.Services);
                     })
+                    let obstacleCount = new Counter()
                     let safetyBump = magabotState.SafetyBump.MostRecent(false).GetEnumerator()
                     let safetyGround = magabotState.SafetyGround.MostRecent(false).GetEnumerator()
                     let steeringBehavior = scheduler.TaskUpdate
+                                            .Do(gameTime =>
+                                            {
+                                                var gamePad = GamePad.GetState(PlayerIndex.One);
+                                                if (gamePad.IsButtonDown(Buttons.DPadUp)) vehicle.Steering += (gamePad.IsButtonDown(Buttons.A) ? 1.5f : 1) * Vector2.UnitX.Rotate(vehicle.Transform.Rotation);
+                                                if (gamePad.IsButtonDown(Buttons.DPadDown)) vehicle.Steering += -Vector2.UnitX.Rotate(vehicle.Transform.Rotation);
+                                                if (gamePad.IsButtonDown(Buttons.DPadLeft)) vehicle.Steering += 0.5f * Vector2.UnitX.Rotate(vehicle.Transform.Rotation + MathHelper.PiOver2);
+                                                if (gamePad.IsButtonDown(Buttons.DPadRight)) vehicle.Steering += 0.5f * Vector2.UnitX.Rotate(vehicle.Transform.Rotation - MathHelper.PiOver2);
+                                            })
                                             //.Do(Steering.PathFollow(target, path, vehicle, Steering.DefaultMinSpeed, Steering.DefaultMaxSpeed, Steering.DefaultTolerance))
-                                            //.Do(Steering.Arrival(target, vehicle, 1, 3, 0.3f))
-                                            .Where(gameTime => { safetyBump.MoveNext(); return safetyBump.Current; })
-                                            .Where(gameTime => { safetyGround.MoveNext(); return safetyGround.Current; })
+                                            .Do(gameTime =>
+                                            {
+                                                obstacleCount.Value--;
+                                                var sonarThreshold = 35;
+                                                var sonarState = magabotState.Sonar;
+                                                var rotation = 0f;
+                                                if (sonarState[0] < sonarThreshold) rotation -= MathHelper.PiOver4;
+                                                if (sonarState[1] < sonarThreshold) rotation -= MathHelper.PiOver4 * 0.5f;
+                                                //if (sonarState[2] < sonarThreshold) rotation += MathHelper.PiOver4;
+                                                if (sonarState[3] < sonarThreshold) rotation += MathHelper.PiOver4 * 0.5f;
+                                                if (sonarState[4] < sonarThreshold) rotation += MathHelper.PiOver4;
+                                                if (rotation != 0)
+                                                {
+                                                    obstacleCount.Value = 90;
+                                                    obstacleCount.Rotation = rotation;
+                                                }
+
+                                                if (obstacleCount.Value > 0)
+                                                {
+                                                    vehicle.Steering = vehicle.Steering.Rotate(obstacleCount.Rotation);
+                                                }
+                                            })
                                             .Do(gameTime => steeringVisualizer.Steering = vehicle.Steering)
+                                            //.Do(Steering.Arrival(target, vehicle, 1, 3, 0.3f))
+                                            .Where(gameTime => magabotState.Stopped)
+                                            .Where(gameTime => { safetyBump.MoveNext(); return !safetyBump.Current; })
+                                            //.Where(gameTime => { safetyGround.MoveNext(); return !safetyGround.Current; })
                                             .Do(Locomotion.DifferentialSteering(vehicle, differentialSteering, wheelDistance, MathHelper.Pi / 16, 10, 100, 3))
                     let visualizerLoop = scheduler.TaskUpdate
                                             .Do(time => slamVisualizer.Update())
@@ -136,8 +175,8 @@ namespace ProjectNavi.Entities
                                             .Do(time => odometry.UpdateOdometryCommand())
                                             .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0, 0)))
                                             .Do(time => magabotState.Leds.SetLedBoardState(255, 255, 255))
-                                            .Do(time => skype.Magabot = magabotState)
-                                            .Do(time => skype.Show())
+                                            //.Do(time => skype.Magabot = magabotState)
+                                            //.Do(time => skype.Show())
                                             .Take(1)
                     select new CompositeDisposable(
                         bumpers,

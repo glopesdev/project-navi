@@ -11,7 +11,6 @@ namespace ProjectNavi.Hardware
 {
     public class MagabotState :HardwareComponent
     {
-
         private BumperBoard bumpers;
         private BatteryBoard battery;
         private GroundSensorBoard groundSensors;
@@ -19,7 +18,7 @@ namespace ProjectNavi.Hardware
         private IObservable<bool> safetyBump;
         private IObservable<bool> safetyGround;
 
-
+        public bool Stopped { get; private set; }
 
         public enum NavigationMode
         {
@@ -32,6 +31,7 @@ namespace ProjectNavi.Hardware
         public MagabotState(LedBoard leds, DifferentialSteeringBoard steering, BumperBoard bumpers, BatteryBoard battery, GroundSensorBoard groundSensors, SonarsBoard sonars)
         {
             Leds = leds;
+            Stopped = true;
             DifferentialSteering = steering;
             Sonar = new double[5];
             this.bumpers = bumpers;
@@ -40,7 +40,7 @@ namespace ProjectNavi.Hardware
             this.sonars = sonars;
             this.battery.BatteryMeasure.Subscribe( m => Battery = m);
             this.sonars.SonarsBoardMeasure.Subscribe(SonarsMeasure);
-            IRGroundThreshold = 800;
+            IRGroundThreshold = 1200;
             bumpers.BumpersMeasure.Subscribe( m => BumperSensorState = m);
 
             safetyBump = (from measurement in bumpers.BumpersMeasure.Do(measurement => BumperSensorState = measurement)
@@ -71,12 +71,18 @@ namespace ProjectNavi.Hardware
                     .DistinctUntilChanged()
                     .Select(groundState =>
                     {
-                        if (groundState || Navigation == NavigationMode.Direct) return Observable.Repeat(groundState, 1);
-                        else
+                        if (groundState)
                         {
-                            return from tick in Observable.Timer(TimeSpan.FromMilliseconds(SafetyTimeMilis))
-                                   select groundState;
+                            if (Navigation != NavigationMode.Direct)
+                                Backward();
                         }
+                        else if (Navigation != NavigationMode.Direct)
+                        {
+                            return (from tick in Observable.Timer(TimeSpan.FromMilliseconds(SafetyTimeMilis))
+                                   select groundState)
+                                   .Do(m => Stop());
+                        }
+                        return Observable.Repeat(groundState, 1);
                     })
                     .Switch()
                     .Publish()
@@ -163,23 +169,28 @@ namespace ProjectNavi.Hardware
 
         public void Forward()
         {
-            this.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(MaxVelocity, MaxVelocity));   
+            this.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(MaxVelocity, MaxVelocity));
+            Stopped = false;
         }
         public void Backward()
         {
+            Stopped = false;
             DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-MaxVelocity, -MaxVelocity));  
         }
         public void Left()
         {
+            Stopped = false;
             DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(MaxVelocity, -MaxVelocity));  
         }
         public void Right()
         {
-            DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-MaxVelocity, MaxVelocity));  
+            DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-MaxVelocity, MaxVelocity));
+            Stopped = false;
         }
         public void Stop()
         {
             DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0, 0));
+            Stopped = true;
         }
         public void SimpleObstacleAvoidance()
         {

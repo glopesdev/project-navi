@@ -4,8 +4,27 @@
   <Asset Type="ProjectNavi.Tasks.NavigationEnvironment">
     <Landmarks>
       <Item>
-        <Name>Coffee Machine</Name>
-        <MarkerId>4</MarkerId>
+        <Name>Paton Lab</Name>
+        <MarkerId>1</MarkerId>
+      </Item>
+      <Item>
+        <Name>Home Base</Name>
+        <MarkerId>2</MarkerId>
+      </Item>
+      <Item>
+        <Name>Ribeiro Lab</Name>
+        <MarkerId>8</MarkerId>
+        <Task Type="ProjectNavi.Tasks.Sequence">
+          <Tasks>
+            <Item Type="ProjectNavi.Tasks.MoveToLandmark">
+              <Tolerance>0.2</Tolerance>
+            </Item>
+          </Tasks>
+        </Task>
+      </Item>
+      <Item>
+        <Name>Lab Entrance</Name>
+        <MarkerId>11</MarkerId>
         <Task Type="ProjectNavi.Tasks.Sequence">
           <Tasks>
             <Item Type="ProjectNavi.Tasks.MoveToLandmark">
