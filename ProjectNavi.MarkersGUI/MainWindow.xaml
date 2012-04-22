@@ -1,0 +1,46 @@
+﻿<Window x:Class="ProjectNavi.MarkersGUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Markers GUI" Height="415" Width="525" Icon="/ProjectNavi.MarkersGUI;component/Images/logotrasnparente.png">
+    <Grid>
+        <Button Content="Print" Height="35" HorizontalAlignment="Left" Margin="409,297,0,0" Name="printButton" VerticalAlignment="Top" Width="82" Click="printButton_Click" />
+        <Canvas Height="320" HorizontalAlignment="Left" Margin="12,12,0,0" Name="markerCanvas" VerticalAlignment="Top" Width="160">
+            <Rectangle Canvas.Left="10" Canvas.Top="170" Height="140" Name="markerBackground" Width="140" Fill="Black" StrokeThickness="0" Stroke="{x:Null}" />
+            <Rectangle Canvas.Left="30" Canvas.Top="190" Fill="White" Height="20" Name="bitA1" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="50" Canvas.Top="190" Fill="White" Height="20" Name="bitA2" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="70" Canvas.Top="190" Fill="White" Height="20" Name="bitA3" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="90" Canvas.Top="190" Fill="White" Height="20" Name="bitA4" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="110" Canvas.Top="190" Fill="White" Height="20" Name="bitA5" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="30" Canvas.Top="210" Fill="White" Height="20" Name="bitB1" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="50" Canvas.Top="210" Fill="White" Height="20" Name="bitB2" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="70" Canvas.Top="210" Fill="White" Height="20" Name="bitB3" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="90" Canvas.Top="210" Fill="White" Height="20" Name="bitB4" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="110" Canvas.Top="210" Fill="White" Height="20" Name="bitB5" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="30" Canvas.Top="230" Fill="White" Height="20" Name="bitC1" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="50" Canvas.Top="230" Fill="White" Height="20" Name="bitC2" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="70" Canvas.Top="230" Fill="White" Height="20" Name="bitC3" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="90" Canvas.Top="230" Fill="White" Height="20" Name="bitC4" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="110" Canvas.Top="230" Fill="White" Height="20" Name="bitC5" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="30" Canvas.Top="250" Fill="White" Height="20" Name="bitD1" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="50" Canvas.Top="250" Fill="White" Height="20" Name="bitD2" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="70" Canvas.Top="250" Fill="White" Height="20" Name="bitD3" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="90" Canvas.Top="250" Fill="White" Height="20" Name="bitD4" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="110" Canvas.Top="250" Fill="White" Height="20" Name="bitD5" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="30" Canvas.Top="270" Fill="White" Height="20" Name="bitE1" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="50" Canvas.Top="270" Fill="White" Height="20" Name="bitE2" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="70" Canvas.Top="270" Fill="White" Height="20" Name="bitE3" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="90" Canvas.Top="270" Fill="White" Height="20" Name="bitE4" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Rectangle Canvas.Left="110" Canvas.Top="270" Fill="White" Height="20" Name="bitE5" Stroke="{x:Null}" StrokeThickness="0" Width="20" />
+            <Image Canvas.Left="10" Canvas.Top="10" Height="140" Name="image" Stretch="Fill" Width="140" />
+        </Canvas>
+        <TextBox Height="23" Name="idTextBox" Margin="203,216,0,136" HorizontalAlignment="Left" Width="56" />
+        <Button Content="Create" Height="23" HorizontalAlignment="Right" Margin="0,216,193,0" Name="createButton" VerticalAlignment="Top" Width="45" Click="createButton_Click" />
+        <Label Content="Marker ID" Height="23" HorizontalAlignment="Left" Margin="192,186,0,0" Name="makerIdTitleLabel" VerticalAlignment="Top" FontWeight="Bold" />
+        <Button Content="Open Image" Height="23" HorizontalAlignment="Right" Margin="0,47,213,0" Name="openImageButton" VerticalAlignment="Top" Width="87" Click="openImageButton_Click" />
+        <Slider Height="23" HorizontalAlignment="Left" Margin="203,279,0,0" Name="markerWidthSlider" VerticalAlignment="Top" Width="140" SmallChange="1" TickPlacement="TopLeft" Interval="1" IsSnapToTickEnabled="True" Minimum="5" Maximum="15" />
+        <Label Content="{Binding Path=Value, ElementName=markerWidthSlider}" Height="28" Margin="340,274,0,0" Name="markerWidthValueLabel" VerticalAlignment="Top" FlowDirection="RightToLeft" HorizontalAlignment="Left" Width="28" />
+        <Label Height="28" Margin="0,274,117,0" Name="markerWidthLabel" VerticalAlignment="Top" Content="cm" HorizontalAlignment="Right" Width="26" />
+        <Label Content="Marker Width" FontWeight="Bold" Height="23" HorizontalAlignment="Left" Margin="192,253,0,0" Name="markerWidthTitleLabel" VerticalAlignment="Top" />
+        <Label Content="Human Readable Image" FontWeight="Bold" Height="31" HorizontalAlignment="Left" Margin="192,22,0,0" Name="mageLabel" VerticalAlignment="Top" />
+    </Grid>
+</Window>
