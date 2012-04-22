@@ -65,7 +65,7 @@ namespace ProjectNavi.Graphics
                 var viewport = new Viewport(0, 0, Frame.Sensor.DepthStream.FrameWidth, Frame.Sensor.DepthStream.FrameHeight);
                 primitiveBatch.Begin(PrimitiveType.TriangleList);
 
-                for (int i = 0; i < viewport.Height; i += DepthStep)
+                for (int i = viewport.Height - 1; i >= 0; i -= DepthStep)
                 {
                     for (int j = 0; j < viewport.Width; j += DepthStep)
                     {
