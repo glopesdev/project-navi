@@ -21,7 +21,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\ProjectNavi\ProjectNaviContent\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -95,6 +95,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\logotrasnparente.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProjectNavi.Tasks\ProjectNavi.Tasks.csproj">
+      <Project>{67485552-BA56-4CD1-898D-6D64BECCAFD0}</Project>
+      <Name>ProjectNavi.Tasks</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -78,7 +78,7 @@ namespace ProjectNavi
         {
             // TODO: Add your initialization logic here
             //communication = new CommunicationManagerSerial("COM30", 9600);
-            communication = new CommunicationManagerSerial("COM21", 57600);
+            communication = new CommunicationManagerSerial("COM15", 57600);
             base.Initialize();
         }
 
