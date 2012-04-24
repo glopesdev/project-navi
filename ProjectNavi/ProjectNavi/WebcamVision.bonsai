@@ -14,7 +14,7 @@
       </Expression>
       <Expression xsi:type="Source">
         <Source xsi:type="q2:CameraCapture">
-          <q2:Index>1</q2:Index>
+          <q2:Index>0</q2:Index>
         </Source>
       </Expression>
       <Expression xsi:type="q3:ThreadPool" />

@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Windows.Threading;
+using ProjectNavi.Tasks;
 
 namespace ProjectNavi.MarkersGUI
 {
@@ -21,19 +22,23 @@ namespace ProjectNavi.MarkersGUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        ProjectNavi.Tasks.NavigationEnvironment environment;
+
         private Dispatcher _dispatcher;
 
         SolidColorBrush black = new SolidColorBrush(Colors.Black);
         SolidColorBrush white = new SolidColorBrush(Colors.White);
-
-        //Rectangle[] bits = new Rectangle[25];
-
+        
         public MainWindow()
         {
             InitializeComponent();
 
-
             _dispatcher = this.Dispatcher;
+
+            foreach (var landmark in environment.Landmarks)
+            {
+                markerNameComboBox.Items.Add(landmark.Name);
+            }
         }
 
         private void createButton_Click(object sender, RoutedEventArgs e)

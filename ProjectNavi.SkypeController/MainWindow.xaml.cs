@@ -36,13 +36,11 @@ namespace ProjectNavi.SkypeController
         int skypeChats = 0;
         int skypeCalls = 0;
 
-        //public SerialPort serialPort;
         public MagabotState Magabot {get; set;}
 
         
         int bumpMsgTime;
         int holeMsgTime;
-        //int backUpTime;
         bool safetyBump, safetyGround;
 
         char lastDirectionSet;
@@ -112,8 +110,6 @@ namespace ProjectNavi.SkypeController
 
         public void OnKinectFrame(KinectFrame kinectFrame)
         {
-            //TODO: Kinect skeleton code here: kinectFrame.SkeletonData (...)
-
             _dispatcher.BeginInvoke((Action)(() =>
             {
                 String skeletonsMsg = "People: ";
@@ -137,10 +133,6 @@ namespace ProjectNavi.SkypeController
                                 personButton[i].Content = skeleton.TrackingId;
                                 personButton[i].Visibility = System.Windows.Visibility.Visible;
 
-                                //convert the value to X/Y
-                                //Joint scaledJoint = joint.ScaleTo(320, 240);
-
-                                //convert & scale (.3 = means 1/3 of joint distance)
                                 Joint scaledJoint = joint.ScaleTo(320, 240, .3f, .3f);
 
                                 Canvas.SetLeft(personButton[i], scaledJoint.Position.X - (personButton[i].Width / 2));
@@ -220,30 +212,20 @@ namespace ProjectNavi.SkypeController
                             }
                         }
                     }
-                    else
-                    {
-                        //buttonUncheckSelectedUser.IsEnabled = false;
-                        //comboBoxSelectedUser.SelectedIndex = -1;
-                    }
                 }));
             }
             catch
             {
             }
-            
         }
 
         private void Update(object sender, EventArgs e)
         {
             bumpMsgTime++;
             holeMsgTime++;
-            //backUpTime++;
 
             if (Magabot.BumperSensorState.BumperLeft || Magabot.BumperSensorState.BumperRight)
             {
-                //SetDirection('s', "Safety");
-                
-
                 if (bumpMsgTime > 25)
                 {
                     _dispatcher.BeginInvoke((Action)(() =>
@@ -259,9 +241,6 @@ namespace ProjectNavi.SkypeController
             }
             if (safetyGround)
             {
-                //SetDirection('s', "Safety");
-               // Magabot.Leds.SetLedBoardState(255, 0, 0);
-
                 if (holeMsgTime > 50)
                 {
                     _dispatcher.BeginInvoke((Action)(() =>
@@ -275,13 +254,6 @@ namespace ProjectNavi.SkypeController
                     holeMsgTime = 0;
                 }
             }
-
-            //if (backUpTime == 10)
-            //{
-            //    SetDirection('p', "Safety");
-            //    Magabot.Leds.SetLedBoardState(0, 0, 255);
-            //}
-            
         }
 
         public void skype_MessageStatus(ChatMessage msg, TChatMessageStatus Status)
@@ -314,6 +286,11 @@ namespace ProjectNavi.SkypeController
                     else if (msg.Body.Contains("Follow: "))
                     {
                         selectedTrackingId = (int)Int16.Parse(msg.Body.Split(new [] {':'})[1]);
+                    }
+                    else if(msg.Body.StartsWith("#"))
+                    {
+                        string markerName = msg.Body.Substring(1);
+                        Magabot.ActivateMarker(markerName);
                     }
                     else
                     {
@@ -374,11 +351,15 @@ namespace ProjectNavi.SkypeController
         {
             try
             {
-                if (status == TCallStatus.clsRinging)
+                if (status == TCallStatus.clsRinging && call.Type != TCallType.cltOutgoingP2P)
                 {
                     if (skypeCalls == 0)
                     {
-                        call.Answer();
+                        try
+                        {
+                            call.Answer();
+                        }
+                        catch { }
                     }
                     else
                     {

@@ -115,7 +115,7 @@ namespace ProjectNavi.Entities
                     let differentialSteering = new DifferentialSteeringBoard(communication, wheelRadius, wheelClicks)
                     let odometry = new OdometryBoard(communication, wheelClicks, wheelRadius, wheelDistance)
                     let magabotState = new MagabotState(leds, differentialSteering, bumpers, battery, ground, sonars)
-                    //let skype = new MainWindow(magabotState)
+                    let skype = new MainWindow(magabotState)
                     let kalman = new KalmanFilter
                     {
                         Mean = new DenseVector(3),
@@ -212,8 +212,8 @@ namespace ProjectNavi.Entities
                                             .Do(time => odometry.UpdateOdometryCommand())
                                             .Do(time => magabotState.DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(0, 0)))
                                             .Do(time => magabotState.Leds.SetLedBoardState(255, 255, 255))
-                                            //.Do(time => skype.Magabot = magabotState)
-                                            //.Do(time => skype.Show())
+                                            .Do(time => skype.Magabot = magabotState)
+                                            .Do(time => skype.Show())
                                             .Take(1)
                     select new CompositeDisposable(
                         bumpers,
@@ -248,11 +248,18 @@ namespace ProjectNavi.Entities
                         {
                             kinectVisualizer.Frame = kinectFrame;
                             freeSpaceVisualizer.FreeSpace = KinectFreeSpace.ComputeFreeSpace(kinectFrame, 1500);
-                            //skype.OnKinectFrame(kinectFrame);
+                            skype.OnKinectFrame(kinectFrame);
                         }),
                         markerStream.Subscribe(markerOutput =>
                         {
-                            var image = markerOutput.Item1.Clone();
+                            var inputImage = markerOutput.Item1;
+                            var image = new IplImage(new CvSize(kinectTexture.Texture.Width, kinectTexture.Texture.Height), inputImage.Depth, inputImage.NumChannels);
+                            if (inputImage.Width != kinectTexture.Texture.Width || inputImage.Height != kinectTexture.Texture.Height)
+                            {
+                                ImgProc.cvResize(inputImage, image, SubPixelInterpolation.NearestNeighbor);
+                            }
+                            else Core.cvCopy(inputImage, image);
+
                             foreach (var marker in markerOutput.Item2.DetectedMarkers)
                             {
                                 marker.Draw(image.DangerousGetHandle(), 0, 0, 255, 2, true);
@@ -288,7 +295,6 @@ namespace ProjectNavi.Entities
                             sonarVisualizer.SonarFrame = m;
                             for (int count = 0; count < m.Length; count++)
                             {
-                                //magabotState
                                 var sonar = m[count];
                                 text.Append(string.Format("Sonar: {0} ", sonar));
                             }

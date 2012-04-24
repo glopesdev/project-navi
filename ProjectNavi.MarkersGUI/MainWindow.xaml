@@ -42,5 +42,6 @@
         <Label Height="28" Margin="0,274,117,0" Name="markerWidthLabel" VerticalAlignment="Top" Content="cm" HorizontalAlignment="Right" Width="26" />
         <Label Content="Marker Width" FontWeight="Bold" Height="23" HorizontalAlignment="Left" Margin="192,253,0,0" Name="markerWidthTitleLabel" VerticalAlignment="Top" />
         <Label Content="Human Readable Image" FontWeight="Bold" Height="31" HorizontalAlignment="Left" Margin="192,22,0,0" Name="mageLabel" VerticalAlignment="Top" />
+        <ComboBox Height="23" HorizontalAlignment="Left" Margin="252,109,0,0" Name="markerNameComboBox" VerticalAlignment="Top" Width="120" />
     </Grid>
 </Window>
