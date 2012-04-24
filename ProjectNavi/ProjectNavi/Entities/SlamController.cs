@@ -18,11 +18,12 @@ namespace ProjectNavi.Entities
     public class SlamController
     {
         EkfSlam slam;
-        Dictionary<int, int> landmarkIndices;
+        LandmarkMappingCollection landmarkIndices;
         Vehicle vehicle;
 
         Vector<double> motion;
         IEnumerable<LandmarkMeasurement> measurements;
+        SlamControllerState memento;
 
         public SlamController(Vehicle agent)
         {
@@ -39,7 +40,7 @@ namespace ProjectNavi.Entities
                 {0, 1.0}
             });
 
-            landmarkIndices = new Dictionary<int, int>();
+            landmarkIndices = new LandmarkMappingCollection();
             motion = new DenseVector(2);
             measurements = Enumerable.Empty<LandmarkMeasurement>();
             vehicle = agent;
@@ -52,17 +53,17 @@ namespace ProjectNavi.Entities
 
         public int GetLandmarkId(int landmarkIndex)
         {
-            return landmarkIndices.First(pair => pair.Value == landmarkIndex).Key;
+            return landmarkIndices.First(pair => pair.LandmarkIndex == landmarkIndex).MarkerId;
         }
 
         public Vector2? GetLandmarkPosition(int markerId)
         {
-            int landmarkIndex;
-            if (!landmarkIndices.TryGetValue(markerId, out landmarkIndex))
+            if (!landmarkIndices.Contains(markerId))
             {
                 return null;
             }
 
+            var landmarkIndex = landmarkIndices[markerId].LandmarkIndex;
             var stateVectorIndex = EkfSlam.LandmarkDim * landmarkIndex + EkfSlam.StateDim;
             var landmarkX = slam.Mean[stateVectorIndex];
             var landmarkY = slam.Mean[stateVectorIndex + 1];
@@ -79,13 +80,13 @@ namespace ProjectNavi.Entities
                 var range = markerPosition.Norm(2);
                 //System.Diagnostics.Trace.WriteLine(string.Format("mx: {0} my: {1} bearing:{2} range:{3}", markerPosition[0], markerPosition[1], bearing, range));
 
-                int landmarkIndex;
-                if (!landmarkIndices.TryGetValue(marker.Id, out landmarkIndex))
+                if (!landmarkIndices.Contains(marker.Id))
                 {
-                    landmarkIndex = landmarkIndices.Count;
-                    landmarkIndices.Add(marker.Id, landmarkIndex);
+                    var nextIndex = landmarkIndices.Count;
+                    landmarkIndices.Add(new LandmarkMapping { MarkerId = marker.Id, LandmarkIndex = nextIndex });
                 }
 
+                var landmarkIndex = landmarkIndices[marker.Id].LandmarkIndex;
                 return new LandmarkMeasurement(landmarkIndex, new DenseVector(new[] { range, bearing }));
             }).ToList();
         }
@@ -98,12 +99,51 @@ namespace ProjectNavi.Entities
 
         public void UpdateEstimate()
         {
+            if (memento != null)
+            {
+                var covarianceOrder = (int)Math.Sqrt(memento.Covariance.Length);
+                var motionNoiseOrder = (int)Math.Sqrt(memento.MotionNoise.Length);
+                var measurementNoiseOrder = (int)Math.Sqrt(memento.MeasurementNoise.Length);
+                slam.Mean = new DenseVector(memento.Mean);
+                slam.Covariance = new DenseMatrix(covarianceOrder, covarianceOrder, memento.Covariance);
+                slam.MotionNoise = new DenseMatrix(motionNoiseOrder, motionNoiseOrder, memento.MotionNoise);
+                slam.MeasurementNoise = new DenseMatrix(measurementNoiseOrder, measurementNoiseOrder, memento.MeasurementNoise);
+
+                landmarkIndices.Clear();
+                foreach (var mapping in memento.LandmarkIndices)
+                {
+                    landmarkIndices.Add(mapping);
+                }
+                memento = null;
+            }
+
             slam.Update(motion, measurements);
 
             // Wrap angle
             slam.Mean[2] = MathHelper.WrapAngle((float)slam.Mean[2]);
             vehicle.Transform.Position = new Vector2((float)slam.Mean[0], (float)slam.Mean[1]);
             vehicle.Transform.Rotation = (float)slam.Mean[2];
+        }
+
+        public SlamControllerState StoreControllerState()
+        {
+            var state = new SlamControllerState();
+            state.Mean = slam.Mean.ToArray();
+            state.Covariance = slam.Covariance.ToColumnWiseArray();
+            state.MotionNoise = slam.MotionNoise.ToColumnWiseArray();
+            state.MeasurementNoise = slam.MeasurementNoise.ToColumnWiseArray();
+
+            foreach (var mapping in landmarkIndices)
+            {
+                state.LandmarkIndices.Add(mapping);
+            }
+
+            return state;
+        }
+
+        public void RestoreControllerState(SlamControllerState state)
+        {
+            memento = state;
         }
     }
 }
