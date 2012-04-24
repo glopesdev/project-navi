@@ -89,8 +89,10 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Entities\Grid.cs" />
     <Compile Include="Entities\KinectFreeSpace.cs" />
+    <Compile Include="Entities\LandmarkMappingCollection.cs" />
     <Compile Include="Entities\Magabot.cs" />
     <Compile Include="Entities\SlamController.cs" />
+    <Compile Include="Entities\SlamControllerState.cs" />
     <Compile Include="Entities\SlamVisualizer.cs" />
     <Compile Include="Graphics\FreeSpaceVisualizer.cs" />
     <Compile Include="Graphics\GraphicsHelper.cs" />
@@ -209,6 +211,7 @@
     </None>
     <None Include="WebcamVision.bonsai">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="KinectColor.yml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

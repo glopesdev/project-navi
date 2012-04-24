@@ -26,6 +26,9 @@ using OpenCV.Net;
 using ProjectNavi.Tasks;
 using Microsoft.Xna.Framework.Input;
 using System.ComponentModel.Design;
+using System.Xml;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace ProjectNavi.Entities
 {
@@ -38,16 +41,29 @@ namespace ProjectNavi.Entities
             public float Rotation { get; set; }
         }
 
+        static void ActivateMarker(ActionPlayer player, Vehicle vehicle, NavigationEnvironment environment, SlamController slam, string landmarkName, IServiceProvider provider)
+        {
+            var smartObject = environment.Landmarks.FirstOrDefault(landmark => landmark.Name == landmarkName);
+            if (smartObject == null) return;
+
+            ActivateMarker(player, vehicle, environment, slam, smartObject, provider);
+        }
+
         static void ActivateMarker(ActionPlayer player, Vehicle vehicle, NavigationEnvironment environment, SlamController slam, int markerId, IServiceProvider provider)
         {
-            var markerPosition = slam.GetLandmarkPosition(markerId);
-            if (markerPosition == null) return;
-
             var smartObject = environment.Landmarks.FirstOrDefault(landmark => landmark.MarkerId == markerId);
             if (smartObject == null) return;
 
-            var task = smartObject.Task;
+            ActivateMarker(player, vehicle, environment, slam, smartObject, provider);
+        }
+
+        static void ActivateMarker(ActionPlayer player, Vehicle vehicle, NavigationEnvironment environment, SlamController slam, SmartObject landmark, IServiceProvider provider)
+        {
+            var task = landmark.Task;
             if (task == null) return;
+
+            var markerPosition = slam.GetLandmarkPosition(landmark.MarkerId);
+            if (markerPosition == null) return;
 
             var markerTransform = new Transform2D(markerPosition.Value, 0, Vector2.One);
             var serviceProvider = new ServiceContainer(provider);
@@ -126,6 +142,27 @@ namespace ProjectNavi.Entities
                         if (keyboard.IsKeyDown(Keys.D7)) ActivateMarker(actionPlayer, vehicle, environment, slam, 7, game.Services);
                         if (keyboard.IsKeyDown(Keys.D8)) ActivateMarker(actionPlayer, vehicle, environment, slam, 8, game.Services);
                         if (keyboard.IsKeyDown(Keys.D9)) ActivateMarker(actionPlayer, vehicle, environment, slam, 9, game.Services);
+
+                        const string mapFileName = "map.xml";
+                        if (keyboard.IsKeyDown(Keys.S))
+                        {
+                            var state = slam.StoreControllerState();
+                            var serializer = new XmlSerializer(typeof(SlamControllerState));
+                            using (var writer = XmlWriter.Create(mapFileName, new XmlWriterSettings { Indent = true }))
+                            {
+                                serializer.Serialize(writer, state);
+                            }
+                        }
+
+                        if (keyboard.IsKeyDown(Keys.R) && File.Exists(mapFileName))
+                        {
+                            var serializer = new XmlSerializer(typeof(SlamControllerState));
+                            using (var reader = XmlReader.Create(mapFileName))
+                            {
+                                var state = (SlamControllerState)serializer.Deserialize(reader);
+                                slam.RestoreControllerState(state);
+                            }
+                        }
                     })
                     let obstacleCount = new Counter()
                     let safetyBump = magabotState.SafetyBump.MostRecent(false).GetEnumerator()
@@ -190,7 +227,6 @@ namespace ProjectNavi.Entities
                         activateMarker.Subscribe(),
                         steeringBehavior.Subscribe(),
                         visualizerLoop.Subscribe(),
-                        kinectStream.Subscribe(),
                         //backRenderer.SubscribeTexture(new Transform2D(new Vector2(-2.75f, 1.7f), 0, new Vector2(0.25f)), kinectTexture.Texture),
                         backRenderer.SubscribeTexture(new Transform2D(new Vector2(-4.25f, 2.0f), 0, new Vector2(0.75f)), kinectTexture.Texture),
                         renderer.SubscribeTexture(transform, texture),
@@ -207,6 +243,7 @@ namespace ProjectNavi.Entities
                         primitiveRenderer.SubscribePrimitive(transform, steeringVisualizer.DrawSteeringVector),
                         primitiveRenderer.SubscribePrimitive(new Transform2D(new Vector2(-350, 200), 0, Vector2.One), freeSpaceVisualizer.DrawFreeSpace),
                         behavior.Subscribe(),
+                        magabotState.MarkerActivated.Subscribe(name => ActivateMarker(actionPlayer, vehicle, environment, slam, name, game.Services)),
                         kinectStream.Subscribe(kinectFrame =>
                         {
                             kinectVisualizer.Frame = kinectFrame;

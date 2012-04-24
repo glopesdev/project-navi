@@ -17,6 +17,7 @@ namespace ProjectNavi.Hardware
         private SonarsBoard sonars;
         private IObservable<bool> safetyBump;
         private IObservable<bool> safetyGround;
+        private Subject<string> markerActivated;
 
         public bool Stopped { get; private set; }
 
@@ -89,6 +90,7 @@ namespace ProjectNavi.Hardware
                     .RefCount();
             safetyGround.Subscribe();
             safetyBump.Subscribe();
+            markerActivated = new Subject<string>();
             MaxVelocity = 10;
             SafetyTimeMilis = 1000;
         }
@@ -119,6 +121,14 @@ namespace ProjectNavi.Hardware
             get 
             {
                 return safetyGround;
+            }
+        }
+
+        public IObservable<string> MarkerActivated
+        {
+            get
+            {
+                return markerActivated;
             }
         }
 
@@ -166,6 +176,11 @@ namespace ProjectNavi.Hardware
         //        safetyBump.OnNext(new BumpEvent(Bumper.BumperRight, measure.BumperRight));
         //    }
         //}
+
+        public void ActivateMarker(string name)
+        {
+            markerActivated.OnNext(name);
+        }
 
         public void Forward()
         {
