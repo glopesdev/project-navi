@@ -63,6 +63,7 @@ namespace ProjectNavi.SkypeController
             skype = new Skype();
             skype.MessageStatus += new _ISkypeEvents_MessageStatusEventHandler(skype_MessageStatus);
             skype.CallStatus += new _ISkypeEvents_CallStatusEventHandler(skype_CallStatus);
+            skype.CallDtmfReceived += new _ISkypeEvents_CallDtmfReceivedEventHandler(skype_CallDtmfReceived);
             
             TimerCallback tcb = this.CheckStatus;
             AutoResetEvent ar = new AutoResetEvent(true);
@@ -104,6 +105,9 @@ namespace ProjectNavi.SkypeController
                 else
                     Magabot.Leds.SetLedBoardState(0, 0, 255);
             });
+
+            Magabot.MaxVelocity = 10;
+            Magabot.MaxTurnVelocity = 8;
 
             reportSkeletons = false;
         }
@@ -294,16 +298,6 @@ namespace ProjectNavi.SkypeController
                     }
                     else
                     {
-                        int sameItemNumber = 0;
-                        int i = 0;
-                        while (i < comboBoxSelectedUser.Items.Count)
-                        {
-                            if (msg.Sender.Handle == comboBoxSelectedUser.Items.GetItemAt(i).ToString())
-                                sameItemNumber++;
-
-                            i++;
-                        }
-
                         if (!comboBoxSelectedUser.Items.Cast<string>().Contains(msg.Sender.Handle)) // New chat
                         {
                             comboBoxSelectedUser.Items.Add(msg.Sender.Handle);
@@ -315,7 +309,9 @@ namespace ProjectNavi.SkypeController
                         }
 
                         if (comboBoxSelectedUser.SelectedItem == null) // First chat
+                        {
                             comboBoxSelectedUser.SelectedItem = msg.Sender.Handle;
+                        }
 
                         if (msg.Sender.Handle == comboBoxSelectedUser.SelectedItem.ToString() && msg.Sender.Handle != "") // Message from the selected user
                         {
@@ -378,13 +374,45 @@ namespace ProjectNavi.SkypeController
             }
         }
 
+        public void skype_CallDtmfReceived(Call call, string code)
+        {
+            _dispatcher.BeginInvoke((Action)(() =>
+            {
+                listEvents.Items.Add(String.Format("DTMF code from {0}: {1}", call.PartnerHandle, code));
+                listEvents.SelectedIndex = listEvents.Items.Count - 1;
+                
+                // Always use try/catch with ANY Skype calls.
+                try
+                {
+                    switch (code)
+                    {
+                        case "2": SetDirection('w', "DTMF");
+                            break;
+                        case "8": SetDirection('s', "DTMF");
+                            break;
+                        case "4": SetDirection('a', "DTMF");
+                            break;
+                        case "6": SetDirection('d', "DTMF");
+                            break;
+                        case "5": SetDirection('p', "DTMF");
+                            break;
+                        default: SetDirection('p', "DTMF");
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                }
+            }));
+        }
+
         private void comboBoxSelectedUser_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _dispatcher.BeginInvoke((Action)(() =>
             {
                 if (checkBoxSendControllerMessage.IsChecked == true)
                 {
-                    skype.SendMessage(comboBoxSelectedUser.Text, Properties.Settings.Default.controllerMessage);
+                    skype.SendMessage(comboBoxSelectedUser.SelectedItem.ToString(), Properties.Settings.Default.controllerMessage);
                 }
 
                 buttonUncheckSelectedUser.IsEnabled = true;

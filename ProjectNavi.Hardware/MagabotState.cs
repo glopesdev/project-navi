@@ -92,10 +92,12 @@ namespace ProjectNavi.Hardware
             safetyBump.Subscribe();
             markerActivated = new Subject<string>();
             MaxVelocity = 10;
+            MaxTurnVelocity = 5;
             SafetyTimeMilis = 1000;
         }
 
         public double MaxVelocity { get; set; }
+        public double MaxTurnVelocity { get; set; }
         public double Battery { get; private set; }
         public double[] Sonar { get; private set; }
         public BumpersMeasurement BumperSensorState  { get; private set; }
@@ -195,11 +197,11 @@ namespace ProjectNavi.Hardware
         public void Left()
         {
             Stopped = false;
-            DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(MaxVelocity, -MaxVelocity));  
+            DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(MaxTurnVelocity, -MaxTurnVelocity));  
         }
         public void Right()
         {
-            DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-MaxVelocity, MaxVelocity));
+            DifferentialSteering.UpdateWheelVelocity(new WheelVelocity(-MaxTurnVelocity, MaxTurnVelocity));
             Stopped = false;
         }
         public void Stop()
