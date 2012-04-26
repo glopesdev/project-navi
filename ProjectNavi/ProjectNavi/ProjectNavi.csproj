@@ -16,8 +16,8 @@
     <XnaProfile>Reach</XnaProfile>
     <XnaCrossPlatformGroupID>1bd0afac-fa5a-4ab0-8dbc-a14194119340</XnaCrossPlatformGroupID>
     <XnaOutputType>Game</XnaOutputType>
-    <ApplicationIcon>Game.ico</ApplicationIcon>
-    <Thumbnail>GameThumbnail.png</Thumbnail>
+    <ApplicationIcon>transparentLogo.ico</ApplicationIcon>
+    <Thumbnail>transparentLogo.png</Thumbnail>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -111,6 +111,8 @@
     <Content Include="GameThumbnail.png">
       <XnaPlatformSpecific>true</XnaPlatformSpecific>
     </Content>
+    <Content Include="transparentLogo.ico" />
+    <Content Include="transparentLogo.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Externals\Bonsai\Bonsai.IO\Bonsai.IO.csproj">
